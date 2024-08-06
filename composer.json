@@ -1,0 +1,37 @@
+{
+    "name": "lwekuiper/statamic-activecampaign",
+    "license": "proprietary",
+    "type": "statamic-addon",
+    "require": {
+        "statamic/cms": "^4.0 || ^5.0",
+        "stillat/proteus": "^4.0"
+    },
+    "description": "Subscribe registrations or contact forms to ActiveCampaign",
+    "authors": [
+        {
+            "name": "Laurens Kuiper",
+            "email": "l@urens.me"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Lwekuiper\\StatamicActivecampaign\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Statamic ActiveCampaign",
+            "description": "ActiveCampaign integration for Statamic"
+        },
+        "laravel": {
+            "providers": [
+                "Lwekuiper\\StatamicActivecampaign\\ServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
+    }
+}
