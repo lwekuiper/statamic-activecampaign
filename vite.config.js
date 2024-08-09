@@ -8,7 +8,7 @@ export default defineConfig({
             input: [
                 'resources/js/addon.js',
             ],
-            publicDirectory: 'resources/dist',
+            publicDirectory: 'dist',
         }),
         vue(),
     ],
