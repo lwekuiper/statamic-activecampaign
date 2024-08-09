@@ -1,7 +1,7 @@
 {
-  "resources/js/cp.js": {
-    "file": "assets/cp-61138e08.js",
+  "resources/js/addon.js": {
+    "file": "assets/addon-61138e08.js",
     "isEntry": true,
-    "src": "resources/js/cp.js"
+    "src": "resources/js/addon.js"
   }
 }
