@@ -5,12 +5,27 @@ return [
     /**
      *
      */
+    'api_url' => env('ACTIVECAMPAIGN_API_URL'),
+
+    /**
+     *
+     */
     'api_key' => env('ACTIVECAMPAIGN_API_KEY'),
 
     /**
      *
      */
-    'api_url' => env('ACTIVECAMPAIGN_API_URL'),
+    'form' => '',
+
+    /**
+     *
+     */
+    'email_field' => '',
+
+    /**
+     *
+     */
+    'consent_field' => '',
 
     /**
      *
@@ -25,6 +40,6 @@ return [
     /**
      *
      */
-    'sites' => [],
+    'merge_fields' => [],
 
 ];
