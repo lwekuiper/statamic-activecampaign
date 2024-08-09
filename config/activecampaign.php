@@ -15,31 +15,38 @@ return [
     /**
      *
      */
-    'form' => '',
+    'forms' => [
 
-    /**
-     *
-     */
-    'email_field' => '',
+        /**
+         *
+         */
+        'form' => '',
 
-    /**
-     *
-     */
-    'consent_field' => '',
+        /**
+         *
+         */
+        'email_field' => '',
 
-    /**
-     *
-     */
-    'list_id' => '',
+        /**
+         *
+         */
+        'consent_field' => '',
 
-    /**
-     *
-     */
-    'tag' => '',
+        /**
+         *
+         */
+        'list_id' => '',
 
-    /**
-     *
-     */
-    'merge_fields' => [],
+        /**
+         *
+         */
+        'tag' => '',
+
+        /**
+         *
+         */
+        'merge_fields' => [],
+
+    ]
 
 ];

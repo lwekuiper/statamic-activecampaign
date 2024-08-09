@@ -23,7 +23,8 @@
     "extra": {
         "statamic": {
             "name": "Statamic ActiveCampaign",
-            "description": "ActiveCampaign integration for Statamic"
+            "description": "ActiveCampaign integration for Statamic",
+            "editions": ["free", "lite", "pro"]
         },
         "laravel": {
             "providers": [

@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Statamic\Facades\Blueprint;
 use Illuminate\Support\Facades\Log;
+use Statamic\Facades\Addon;
 use Statamic\Http\Controllers\Controller;
 use Stillat\Proteus\Support\Facades\ConfigWriter;
 
@@ -14,29 +15,54 @@ class ActiveCampaignController extends Controller
 {
     public function edit(Request $request)
     {
-        $site = $request->site ?? Site::selected()->handle();
+        $site = null;
 
-        // $this->authorize('edit', $variables);
+        $config = config('activecampaign', []);
 
-        $values = $this->preProcess('statamic.activecampaign', $site);
+        $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
 
-        $blueprint = $this->getBlueprint();
+        if ($edition === 'free') {
+            $values = $config;
+
+            $blueprint = Blueprint::find('statamic-activecampaign::free');
+        }
+
+        if ($edition === 'lite') {
+            $values = Arr::get($config, "forms", []);
+
+            $blueprint = Blueprint::find('statamic-activecampaign::lite');
+        }
+
+        if ($edition === 'pro') {
+            $site = $request->site ?? Site::selected()->handle();
+
+            $values = Arr::get($config, "sites.{$site}", []);
+
+            $blueprint = Blueprint::find('statamic-activecampaign::pro');
+        }
 
         $fields = $blueprint->fields()->addValues($values)->preProcess();
 
         $viewData = [
+            'edition' => $edition,
             'blueprint' => $blueprint->toPublishArray(),
-            'action' => cp_route('activecampaign.update', ['site' => $site]),
+            'action' => cp_route('activecampaign.update'),
             'values' => $fields->values(),
             'meta' => $fields->meta(),
-            'site' => $site,
-            'localizations' => Site::all()->map(fn ($localization) => [
-                'handle' => $localization->handle(),
-                'name' => $localization->name(),
-                'active' => $localization->handle() === $site,
-                'url' => cp_route('activecampaign.edit', ['site' => $localization->handle()]),
-            ])->values()->all(),
         ];
+
+        if ($edition === 'pro') {
+            $viewData = array_merge($viewData, [
+                'action' => cp_route('activecampaign.update', ['site' => $site]),
+                'site' => $site,
+                'localizations' => Site::all()->map(fn ($localization) => [
+                    'handle' => $localization->handle(),
+                    'name' => $localization->name(),
+                    'active' => $localization->handle() === $site,
+                    'url' => cp_route('activecampaign.edit', ['site' => $localization->handle()]),
+                ])->values()->all(),
+            ]);
+        }
 
         if ($request->wantsJson()) {
             return $viewData;
@@ -64,7 +90,7 @@ class ActiveCampaignController extends Controller
         // $data = $this->postProcess($fields->process()->values()->toArray());
 
         // Write the values back to the config file.
-        ConfigWriter::write("statamic.activecampaign.sites.{$site}", $data);
+        ConfigWriter::write("activecampaign.sites.{$site}", $data);
 
         // ConfigWriter::writeMany('statamic.activecampaign', [
         //     'api_key' => $request->api_key,
@@ -76,21 +102,21 @@ class ActiveCampaignController extends Controller
         ]);
     }
 
-    /**
-     * Get the blueprint.
-     *
-     * @return Blueprint
-     */
-    private function getBlueprint()
-    {
-        return Blueprint::find('statamic-activecampaign::config');
-    }
+    // /**
+    //  * Get the blueprint.
+    //  *
+    //  * @return Blueprint
+    //  */
+    // private function getBlueprint()
+    // {
+    //     return Blueprint::find('statamic-activecampaign::config');
+    // }
 
-    protected function preProcess(string $handle, $site): array
-    {
-        $config = config($handle);
+    // protected function preProcess(string $handle, $site): array
+    // {
+    //     $config = config($handle);
 
-        return Arr::get($config, "sites.{$site}", []);
-    }
+    //     return Arr::get($config, "sites.{$site}", []);
+    // }
 
 }
