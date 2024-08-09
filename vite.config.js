@@ -8,9 +8,7 @@ export default defineConfig({
             input: [
                 'resources/js/cp.js',
             ],
-            refresh: true,
             publicDirectory: 'resources/dist',
-            hotFile: 'resources/dist/hot',
         }),
         vue(),
     ],
