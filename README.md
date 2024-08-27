@@ -7,7 +7,7 @@
 This addon allows you to:
 
 - Configure Statamic forms to subscribe to a ActiveCampaign list
-- Use multi-site to add form configurations per localization
+- Use multi-site to add form configurations per localization - **requires PRO license**
 
 ## Requirements
 
