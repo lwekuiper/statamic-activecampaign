@@ -4,10 +4,9 @@ namespace Lwekuiper\StatamicActivecampaign\Http\Controllers;
 
 use Statamic\Facades\Site;
 use Illuminate\Support\Arr;
+use Statamic\Facades\Addon;
 use Illuminate\Http\Request;
 use Statamic\Facades\Blueprint;
-use Illuminate\Support\Facades\Log;
-use Statamic\Facades\Addon;
 use Statamic\Http\Controllers\Controller;
 use Stillat\Proteus\Support\Facades\ConfigWriter;
 
@@ -15,31 +14,13 @@ class ActiveCampaignController extends Controller
 {
     public function edit(Request $request)
     {
-        $site = null;
+        $site = $request->site ?? Site::selected()->handle();
 
-        $config = config('activecampaign', []);
+        $edition = $this->getEdition();
 
-        $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
+        $blueprint = $this->getBlueprint();
 
-        if ($edition === 'free') {
-            $values = $config;
-
-            $blueprint = Blueprint::find('statamic-activecampaign::free');
-        }
-
-        if ($edition === 'lite') {
-            $values = Arr::get($config, "forms", []);
-
-            $blueprint = Blueprint::find('statamic-activecampaign::lite');
-        }
-
-        if ($edition === 'pro') {
-            $site = $request->site ?? Site::selected()->handle();
-
-            $values = Arr::get($config, "sites.{$site}", []);
-
-            $blueprint = Blueprint::find('statamic-activecampaign::pro');
-        }
+        $values = $this->getValues($edition, $site);
 
         $fields = $blueprint->fields()->addValues($values)->preProcess();
 
@@ -77,46 +58,60 @@ class ActiveCampaignController extends Controller
 
         $blueprint = $this->getBlueprint();
 
-        // Get a Fields object, and populate it with the submitted values.
         $fields = $blueprint->fields()->addValues($request->all());
 
-        // Perform validation. Like Laravel's standard validation, if it fails,
-        // a 422 response will be sent back with all the validation errors.
         $fields->validate();
 
-        // Perform post-processing. This will convert values the Vue components
-        // were using into values suitable for putting into storage.
         $data = $fields->process()->values()->toArray();
-        // $data = $this->postProcess($fields->process()->values()->toArray());
 
-        // Write the values back to the config file.
-        ConfigWriter::write("activecampaign.sites.{$site}", $data);
+        $edition = $this->getEdition();
 
-        // ConfigWriter::writeMany('statamic.activecampaign', [
-        //     'api_key' => $request->api_key,
-        //     "sites.{$site}" => $data,
-        // ]);
+        $key = $this->getConfigKey($edition, $site);
 
-        return response()->json([
-            'saved' => true,
-        ]);
+        ConfigWriter::write("statamic.activecampaign.{$key}", $this->postProcess($data));
+
+        return response()->json(['saved' => true]);
     }
 
-    // /**
-    //  * Get the blueprint.
-    //  *
-    //  * @return Blueprint
-    //  */
-    // private function getBlueprint()
-    // {
-    //     return Blueprint::find('statamic-activecampaign::config');
-    // }
+    /**
+     * Get the blueprint.
+     */
+    private function getBlueprint()
+    {
+        return Blueprint::find('statamic-activecampaign::config');
+    }
 
-    // protected function preProcess(string $handle, $site): array
-    // {
-    //     $config = config($handle);
+    /**
+     * Get the edition of the addon.
+     */
+    private function getEdition(): string
+    {
+        return Addon::get('lwekuiper/statamic-activecampaign')->edition();
+    }
 
-    //     return Arr::get($config, "sites.{$site}", []);
-    // }
+    /**
+     * Post process the values.
+     */
+    private function postProcess(array $values): array
+    {
+        return Arr::get($values, 'forms', []);
+    }
 
+    /**
+     * Get the values from the config.
+     */
+    private function getValues($edition, $site): array
+    {
+        $key = $this->getConfigKey($edition, $site);
+
+        return ['forms' => config("statamic.activecampaign.{$key}", [])];
+    }
+
+    /**
+     * Get the config key based on the edition and site.
+     */
+    private function getConfigKey($edition, $site): string
+    {
+        return $edition === 'pro' ? "sites.{$site}" : 'forms';
+    }
 }
