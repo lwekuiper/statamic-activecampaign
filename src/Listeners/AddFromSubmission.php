@@ -4,12 +4,13 @@ namespace Lwekuiper\StatamicActivecampaign\Listeners;
 
 use Statamic\Facades\Site;
 use Illuminate\Support\Arr;
+use Statamic\Facades\Addon;
+use Statamic\Forms\Submission;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Statamic\Events\SubmissionCreated;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
-use Statamic\Forms\Submission;
 
 class AddFromSubmission
 {
@@ -25,10 +26,17 @@ class AddFromSubmission
 
     public function shouldHandle(Submission $submission)
     {
-        $site = Site::findByUrl(URL::previous()) ?? Site::default();
+        $configKey = 'forms';
+
+        $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
+
+        if ($edition === 'pro') {
+            $site = Site::findByUrl(URL::previous()) ?? Site::default();
+            $configKey = "sites.{$site->handle()}";
+        }
 
         $this->config = collect(Arr::first(
-            config("statamic.activecampaign.sites.{$site->handle()}.forms", []),
+            config("statamic.activecampaign.{$configKey}", []),
             fn (array $formConfig) => $formConfig['form'] == $submission->form()->handle()
         ));
 
@@ -70,8 +78,19 @@ class AddFromSubmission
 
         $response = ActiveCampaign::createOrUpdateContact($contact);
 
-        if (is_string($response)) {
-            Log::error('Syncing contact failed. Error returned: ' . $response);
+        if (! $response->successful()) {
+            Log::error('Syncing contact failed.', [
+                'response' => $response->json(),
+                'contact' => $contact,
+            ]);
+            return;
+        }
+
+        if (app()->environment('local')) {
+            Log::info('Contact synced successfully.', [
+                'response' => $response->json(),
+                'contact' => $contact,
+            ]);
         }
     }
 
