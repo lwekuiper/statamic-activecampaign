@@ -76,13 +76,14 @@ class AddFromSubmission
             'tags' => $this->config->get('tag', ''),
         ], $mergeData);
 
-        $response = ActiveCampaign::createOrUpdateContact($contact);
+        $response = ActiveCampaign::syncContact($contact);
 
         if (! $response->successful()) {
             Log::error('Syncing contact failed.', [
                 'response' => $response->json(),
                 'contact' => $contact,
             ]);
+
             return;
         }
 

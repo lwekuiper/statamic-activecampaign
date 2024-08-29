@@ -16,7 +16,7 @@ class ActiveCampaignService
         $this->key = config('statamic.activecampaign.api_key');
     }
 
-    public function createOrUpdateContact($data)
+    public function syncContact($data)
     {
         return $this->client()->post('contact/sync', [
             'contact' => $data
