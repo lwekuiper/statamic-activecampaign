@@ -23,6 +23,16 @@ class ActiveCampaignService
         ]);
     }
 
+    public function addTagToContact($contactId, $tagId)
+    {
+        return $this->client()->post('contactTags', [
+            'contactTag' => [
+                'contact' => $contactId,
+                'tag' => $tagId
+            ]
+        ]);
+    }
+
     public function getLists()
     {
         return $this->client()->get('lists');

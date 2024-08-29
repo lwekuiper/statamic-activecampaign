@@ -73,7 +73,6 @@ class AddFromSubmission
             'email' => $this->data->get('email'),
             "p[{$listId}]" => $listId,
             "status[{$listId}]" => 1,
-            'tags' => $this->config->get('tag', ''),
         ], $mergeData);
 
         $response = ActiveCampaign::syncContact($contact);
@@ -87,11 +86,19 @@ class AddFromSubmission
             return;
         }
 
-        if (app()->environment('local')) {
-            Log::info('Contact synced successfully.', [
-                'response' => $response->json(),
-                'contact' => $contact,
-            ]);
+        if ($this->config->has('tag')) {
+            $contactId = $response->json()['contact']['id'];
+            $tagId = $this->config->get('tag');
+
+            $response = ActiveCampaign::addTagToContact($contactId, $tagId);
+
+            if (! $response->successful()) {
+                Log::error('Adding tag to contact failed.', [
+                    'response' => $response->json(),
+                    'contact_id' => $contactId,
+                    'tag_id' => $tagId,
+                ]);
+            }
         }
     }
 
