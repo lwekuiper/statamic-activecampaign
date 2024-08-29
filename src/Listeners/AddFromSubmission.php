@@ -7,7 +7,6 @@ use Illuminate\Support\Arr;
 use Statamic\Facades\Addon;
 use Statamic\Forms\Submission;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Statamic\Events\SubmissionCreated;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
@@ -65,41 +64,30 @@ class AddFromSubmission
             return;
         }
 
+        // Create or update contact.
+        $contact = $this->syncContact();
+
+        // Exit if no contact was created or updated.
+        if (! $contact) return;
+
+        // Get contact ID.
+        $contactId = $contact['contact']['id'];
+
+        // Update list status for contact.
+        $this->updateListStatus($contactId);
+
+        // Add optional tag to contact.
+        if ($this->config->has('tag')) {
+            $this->addTagToContact($contactId);
+        }
+    }
+
+    private function syncContact(): ?array
+    {
+        $email = $this->data->get('email');
         $mergeData = $this->getMergeData();
 
-        $listId = $this->config->get('list_id');
-
-        $contact = array_merge([
-            'email' => $this->data->get('email'),
-            "p[{$listId}]" => $listId,
-            "status[{$listId}]" => 1,
-        ], $mergeData);
-
-        $response = ActiveCampaign::syncContact($contact);
-
-        if (! $response->successful()) {
-            Log::error('Syncing contact failed.', [
-                'response' => $response->json(),
-                'contact' => $contact,
-            ]);
-
-            return;
-        }
-
-        if ($this->config->has('tag')) {
-            $contactId = $response->json()['contact']['id'];
-            $tagId = $this->config->get('tag');
-
-            $response = ActiveCampaign::addTagToContact($contactId, $tagId);
-
-            if (! $response->successful()) {
-                Log::error('Adding tag to contact failed.', [
-                    'response' => $response->json(),
-                    'contact_id' => $contactId,
-                    'tag_id' => $tagId,
-                ]);
-            }
-        }
+        return ActiveCampaign::syncContact($email, $mergeData);
     }
 
     private function getMergeData(): array
@@ -122,5 +110,19 @@ class AddFromSubmission
         })->filter()->values()->all();
 
         return array_merge($standardData, ['fieldValues' => $customData]);
+    }
+
+    private function updateListStatus($contactId): void
+    {
+        $listId = $this->config->get('list_id');
+
+        ActiveCampaign::updateListStatus($contactId, $listId);
+    }
+
+    private function addTagToContact($contactId): void
+    {
+        $tagId = $this->config->get('tag');
+
+        ActiveCampaign::addTagToContact($contactId, $tagId);
     }
 }
