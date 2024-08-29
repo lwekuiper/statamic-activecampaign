@@ -18,7 +18,9 @@ class ActiveCampaignService
 
     public function createOrUpdateContact($data)
     {
-        return $this->client()->post('contact/sync', $data);
+        return $this->client()->post('contact/sync', [
+            'contact' => $data
+        ]);
     }
 
     public function getLists()
