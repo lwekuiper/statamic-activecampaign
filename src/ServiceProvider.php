@@ -34,7 +34,7 @@ class ServiceProvider extends AddonServiceProvider
         'input' => [
             'resources/js/addon.js',
         ],
-        'publicDirectory' => 'dist',
+        'publicDirectory' => 'resources/dist',
     ];
 
     public function register()
