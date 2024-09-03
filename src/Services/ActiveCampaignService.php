@@ -62,7 +62,7 @@ class ActiveCampaignService
 
     public function getLists(): ?array
     {
-        $response = $this->client()->get('lists');
+        $response = $this->client()->get('lists', ['limit' => -1]);
 
         return $this->handleResponse($response, 'Failed to get lists');
     }
@@ -76,7 +76,7 @@ class ActiveCampaignService
 
     public function listTags(): ?array
     {
-        $response = $this->client()->get('tags');
+        $response = $this->client()->get('tags', ['limit' => -1]);
 
         return $this->handleResponse($response, 'Failed to list tags');
     }
