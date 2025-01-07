@@ -6,8 +6,13 @@ use Statamic\Support\Arr;
 use Statamic\Fieldtypes\Relationship;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
 
-class ActivecampaignList extends Relationship
+class ActiveCampaignList extends Relationship
 {
+    public static function handle()
+    {
+        return 'activecampaign_list';
+    }
+
     public function getIndexItems($request)
     {
         $response = ActiveCampaign::getLists();

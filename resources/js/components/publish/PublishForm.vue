@@ -1,9 +1,24 @@
 <template>
-
     <div>
+
         <header class="mb-6">
             <div class="flex items-center">
                 <h1 class="flex-1" v-text="title" />
+
+                <dropdown-list v-if="deleteUrl" class="rtl:ml-2 ltr:mr-2">
+                    <dropdown-item
+                        :text="__('Delete Config')"
+                        class="warning"
+                        @click="$refs.deleter.confirm()"
+                    >
+                        <resource-deleter
+                            ref="deleter"
+                            :resourceTitle="title"
+                            :route="deleteUrl"
+                            :redirect="listingUrl">
+                        </resource-deleter>
+                    </dropdown-item>
+                </dropdown-list>
 
                 <site-selector
                     v-if="localizations.length > 1"
@@ -24,7 +39,7 @@
             ref="container"
             name="base"
             :blueprint="blueprint"
-            v-model="values"
+            :values="values"
             :meta="meta"
             :errors="errors"
             v-slot="{ setFieldValue, setFieldMeta }"
@@ -33,8 +48,8 @@
                 @updated="setFieldValue"
                 @meta-updated="setFieldMeta" />
         </publish-container>
-    </div>
 
+    </div>
 </template>
 
 <script>
@@ -42,25 +57,25 @@ import SiteSelector from '../../../../vendor/statamic/cms/resources/js/component
 
 export default {
 
-    components: {
-        SiteSelector
-    },
+    components: {SiteSelector},
 
     props: {
         title: String,
         initialAction: String,
-        method: String,
+        initialDeleteUrl: String,
         blueprint: Object,
         initialMeta: Object,
         initialValues: Object,
         initialLocalizations: Array,
         initialSite: String,
+        listingUrl: String,
     },
 
     data() {
         return {
             localizing: false,
             action: this.initialAction,
+            deleteUrl: this.initialDeleteUrl,
             meta: _.clone(this.initialMeta),
             values: _.clone(this.initialValues),
             localizations: _.clone(this.initialLocalizations),
@@ -73,7 +88,7 @@ export default {
     computed: {
 
         isDirty() {
-            return this.$dirty.has(this.publishContainer);
+            return this.$dirty.has('base');
         },
 
     },
@@ -91,7 +106,7 @@ export default {
             this.saving = true;
             this.clearErrors();
 
-            this.$axios[this.method](this.action, this.values).then(response => {
+            this.$axios.patch(this.action, this.values).then(response => {
                 this.saving = false;
                 this.$toast.success(__('Saved'));
                 this.$refs.container.saved();
@@ -124,13 +139,13 @@ export default {
 
             this.localizing = localization.handle;
 
-            if (this.publishContainer === 'base') {
-                window.history.replaceState({}, '', localization.url);
-            }
+            window.history.replaceState({}, '', localization.url);
 
             this.$axios.get(localization.url).then(response => {
                 const data = response.data;
+                console.log(data.values);
                 this.action = data.action;
+                this.deleteUrl = data.deleteUrl;
                 this.values = data.values;
                 this.meta = data.meta;
                 this.localizations = data.localizations;

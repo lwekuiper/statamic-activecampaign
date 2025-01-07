@@ -20,33 +20,12 @@ export default {
 
     inject: ['storeName'],
 
-    data(){
+    data() {
         return {
             fields: [],
             selected: null,
             showFieldtype: true,
         }
-    },
-
-    watch: {
-        list(list) {
-            this.showFieldtype = false;
-
-            this.refreshFields();
-
-            this.$nextTick(() => this.showFieldtype = true);
-        }
-    },
-
-    computed: {
-        key() {
-            let matches = this.namePrefix.match(/([a-z]*?)\[(.*?)\]/);
-            return matches[0].replace('[', '.').replace(']', '.') + 'list_id.0';
-        },
-
-        list() {
-            return data_get(this.$store.state.publish[this.storeName].values, this.key)
-        },
     },
 
     mounted() {
@@ -60,7 +39,8 @@ export default {
                 .get(cp_url('/activecampaign/merge-fields'))
                 .then(response => {
                     this.fields = response.data;
-                });
+                })
+                .catch(() => { this.fields = []; });
         }
     }
 };

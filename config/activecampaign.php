@@ -2,72 +2,30 @@
 
 return [
 
-    /**
-     * ActiveCampaign API URL
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | ActiveCampaign API URL
+    |--------------------------------------------------------------------------
+    |
+    | The API URL is required to make requests to the ActiveCampaign API.
+    | You can find this URL in your ActiveCampaign account settings.
+    | It typically follows the format: "https://youraccount.api-us1.com"
+    |
+    */
+
     'api_url' => env('ACTIVECAMPAIGN_API_URL'),
 
-    /**
-     * ActiveCampaign API Key
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | ActiveCampaign API Key
+    |--------------------------------------------------------------------------
+    |
+    | The API key is necessary to authenticate your application with
+    | ActiveCampaign. You can find this key in the API section of
+    | your ActiveCampaign account settings.
+    |
+    */
+
     'api_key' => env('ACTIVECAMPAIGN_API_KEY'),
-
-    /**
-     * The form submissions to add to your ActiveCampaign lists
-     */
-    'forms' => [
-        [
-            /**
-             * The form handle.
-             */
-            'form' => '',
-
-            /**
-             * Field name that contains the email.
-             */
-            'email_field' => '',
-
-            /**
-             * Field name that contains the consent.
-             */
-            'consent_field' => '',
-
-            /**
-             * A ActiveCampaign list.
-             */
-            'list_id' => '',
-
-            /**
-             * A ActiveCampaign tag.
-             */
-            'tag' => '',
-
-            /**
-             * Merge fields to add to the contact.
-             */
-            'merge_fields' => [],
-        ]
-    ],
-
-    /**
-     * The multi-site forms to add to your ActiveCampaign lists - requires pro edition
-     */
-    'sites' => [
-        'default' => [
-            [
-                'form' => '',
-
-                'email_field' => '',
-
-                'consent_field' => '',
-
-                'list_id' => '',
-
-                'tag' => '',
-
-                'merge_fields' => [],
-            ]
-        ]
-    ]
 
 ];

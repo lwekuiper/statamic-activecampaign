@@ -3,12 +3,12 @@
 namespace Lwekuiper\StatamicActivecampaign\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Lwekuiper\StatamicActivecampaign\Connectors\ActiveCampaignConnector;
+use Lwekuiper\StatamicActivecampaign\Stache\FormConfigRepository;
 
-class ActiveCampaign extends Facade
+class FormConfig extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return ActiveCampaignConnector::class;
+        return FormConfigRepository::class;
     }
 }

@@ -1,10 +1,8 @@
 <template>
-    <div class="form-field-fieldtype-wrapper">
-        <small class="help-block text-grey-60" v-if="!form">{{ __('Select form') }}</small>
-
+    <div class="statamic-form-fields-fieldtype-wrapper">
         <v-select
             append-to-body
-            v-if="showFieldtype && form"
+            v-if="showFieldtype"
             v-model="selected"
             :clearable="true"
             :options="fields"
@@ -24,41 +22,27 @@ export default {
 
     data() {
         return {
+            fields: [],
             selected: null,
             showFieldtype: true,
-            fields: [],
         }
     },
 
     watch: {
-        form(form) {
-            this.showFieldtype = false;
-
-            this.refreshFields();
-
-            this.$nextTick(() => this.showFieldtype = true);
-        }
+        value(value) {
+            this.selected = value;
+        },
     },
 
     computed: {
         form() {
-            let key = 'forms.' + this.row + '.form.0' ;
-
-            return data_get(this.$store.state.publish[this.storeName].values, key)
+            return StatamicConfig.urlPath.split('/')[1] ?? '';
         },
-
-        row() {
-            let matches = this.namePrefix.match(/\[(.*?)\]/);
-
-            return matches[1];
-        }
     },
 
     mounted() {
         this.selected = this.value;
-        if (this.form) {
-            this.refreshFields();
-        }
+        this.refreshFields();
     },
 
     methods: {
@@ -67,7 +51,8 @@ export default {
                 .get(cp_url(`/activecampaign/form-fields/${this.form}`))
                 .then(response => {
                     this.fields = response.data;
-                });
+                })
+                .catch(() => { this.fields = []; });
         }
     }
 };

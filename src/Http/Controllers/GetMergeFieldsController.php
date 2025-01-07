@@ -36,6 +36,7 @@ class GetMergeFieldsController extends Controller
                 'id' => $customField['id'],
                 'label' => $customField['title']
             ])
+            ->values()
             ->all();
 
         return array_merge($standardFields, $customFields);

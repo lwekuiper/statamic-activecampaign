@@ -9,6 +9,7 @@ use Statamic\Forms\Submission;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Statamic\Events\SubmissionCreated;
+use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
 
 class AddFromSubmission
@@ -25,23 +26,22 @@ class AddFromSubmission
 
     public function shouldHandle(Submission $submission)
     {
-        $configKey = 'forms';
-
         $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
 
-        if ($edition === 'pro') {
-            $site = Site::findByUrl(URL::previous()) ?? Site::default();
-            $configKey = "sites.{$site->handle()}";
-        }
+        $site = ($edition === 'pro')
+            ? Site::findByUrl(URL::previous()) ?? Site::default()
+            : Site::default();
 
-        $this->config = collect(Arr::first(
-            config("statamic.activecampaign.{$configKey}", []),
-            fn (array $formConfig) => $formConfig['form'] == $submission->form()->handle()
-        ));
+        $siteHandle = $site->handle();
+        $formHandle = $submission->form()->handle();
 
-        if ($this->config->isEmpty()) {
+        $formConfig = FormConfig::find($formHandle.'::'.$siteHandle);
+
+        if (! $this->config) {
             return false;
         }
+
+        $this->config = collect($formConfig->toArray());
 
         $this->data = collect($submission->data());
 
