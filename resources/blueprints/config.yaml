@@ -41,30 +41,22 @@ tabs:
           -
             handle: merge_fields
             field:
-              fields:
-                -
-                  handle: field_name
-                  field:
-                    input_type: text
-                    display: Form Field
-                    type: statamic_form_fields
-                    icon: text
-                    listable: hidden
-                -
-                  handle: activecampaign_field
-                  field:
-                    input_type: text
-                    display: 'Merge Field'
-                    type: activecampaign_merge_fields
-                    max_items: 1
-                    icon: text
-                    listable: hidden
-              mode: table
-              reorderable: true
               display: 'Merge Fields'
               instructions: 'Add the form fields you want to map to ActiveCampaign fields.'
               type: grid
-              icon: grid
-              add_row: 'Add Merge Field'
+              mode: table
               listable: hidden
               fullscreen: false
+              width: 100
+              add_row: 'Add Merge Field'
+              fields:
+                -
+                  handle: statamic_field
+                  field:
+                    display: Form Field
+                    type: statamic_form_fields
+                -
+                  handle: activecampaign_field
+                  field:
+                    display: 'Merge Field'
+                    type: activecampaign_merge_fields

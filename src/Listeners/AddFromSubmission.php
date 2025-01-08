@@ -32,12 +32,7 @@ class AddFromSubmission
             ? Site::findByUrl(URL::previous()) ?? Site::default()
             : Site::default();
 
-        $siteHandle = $site->handle();
-        $formHandle = $submission->form()->handle();
-
-        $formConfig = FormConfig::find($formHandle.'::'.$siteHandle);
-
-        if (! $this->config) {
+        if (! $formConfig = FormConfig::find($submission->form()->handle(), $site->handle())) {
             return false;
         }
 
@@ -64,20 +59,15 @@ class AddFromSubmission
             return;
         }
 
-        // Create or update contact.
-        $contact = $this->syncContact();
+        if (! $contact = $this->syncContact()) {
+            return;
+        }
 
-        // Exit if no contact was created or updated.
-        if (! $contact) return;
+        $contactId = Arr::get($contact, 'contact.id');
 
-        // Get contact ID.
-        $contactId = $contact['contact']['id'];
-
-        // Update list status for contact.
         $this->updateListStatus($contactId);
 
-        // Add optional tag to contact.
-        if ($this->config->has('tag')) {
+        if ($this->config->has('tag_id')) {
             $this->addTagToContact($contactId);
         }
     }
@@ -99,13 +89,13 @@ class AddFromSubmission
         });
 
         $standardData = $standardFields->mapWithKeys(function ($item) {
-            return [$item['activecampaign_field'] => $this->data->get($item['field_name'])];
+            return [$item['activecampaign_field'] => $this->data->get($item['statamic_field'])];
         })->filter()->all();
 
         $customData = $customFields->map(function ($item) {
             return [
                 'field' => $item['activecampaign_field'],
-                'value' => $this->data->get($item['field_name'])
+                'value' => $this->data->get($item['statamic_field'])
             ];
         })->filter()->values()->all();
 
@@ -121,7 +111,7 @@ class AddFromSubmission
 
     private function addTagToContact($contactId): void
     {
-        $tagId = $this->config->get('tag');
+        $tagId = $this->config->get('tag_id');
 
         ActiveCampaign::addTagToContact($contactId, $tagId);
     }
