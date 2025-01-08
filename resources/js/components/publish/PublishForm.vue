@@ -39,9 +39,9 @@
             ref="container"
             name="base"
             :blueprint="blueprint"
-            :values="values"
             :meta="meta"
             :errors="errors"
+            v-model="values"
             v-slot="{ setFieldValue, setFieldMeta }"
         >
             <publish-tabs
@@ -86,11 +86,9 @@ export default {
     },
 
     computed: {
-
         isDirty() {
             return this.$dirty.has('base');
         },
-
     },
 
     methods: {
@@ -143,7 +141,6 @@ export default {
 
             this.$axios.get(localization.url).then(response => {
                 const data = response.data;
-                console.log(data.values);
                 this.action = data.action;
                 this.deleteUrl = data.deleteUrl;
                 this.values = data.values;

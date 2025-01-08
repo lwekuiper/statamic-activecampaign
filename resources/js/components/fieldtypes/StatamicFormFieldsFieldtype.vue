@@ -2,13 +2,12 @@
     <div class="statamic-form-fields-fieldtype-wrapper">
         <v-select
             append-to-body
-            v-if="showFieldtype"
-            v-model="selected"
+            v-model="value"
             :clearable="true"
             :options="fields"
             :reduce="(option) => option.id"
+            :placeholder="__('Choose...')"
             :searchable="true"
-            @input="$emit('input', $event)"
         />
     </div>
 </template>
@@ -23,15 +22,7 @@ export default {
     data() {
         return {
             fields: [],
-            selected: null,
-            showFieldtype: true,
         }
-    },
-
-    watch: {
-        value(value) {
-            this.selected = value;
-        },
     },
 
     computed: {
@@ -41,7 +32,6 @@ export default {
     },
 
     mounted() {
-        this.selected = this.value;
         this.refreshFields();
     },
 
@@ -53,7 +43,7 @@ export default {
                     this.fields = response.data;
                 })
                 .catch(() => { this.fields = []; });
-        }
+        },
     }
 };
 </script>
