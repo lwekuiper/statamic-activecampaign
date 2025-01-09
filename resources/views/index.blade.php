@@ -21,7 +21,6 @@
             'svg' => 'empty/form',
             'button_text' => __('Create Form'),
             'button_url' => cp_route('forms.create'),
-            'can' => $user->can('create', 'Statamic\Contracts\Forms\Form')
         ])
 
     @endunless
