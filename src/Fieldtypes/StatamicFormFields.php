@@ -4,7 +4,7 @@ namespace Lwekuiper\StatamicActivecampaign\Fieldtypes;
 
 use Statamic\Fields\Fieldtype;
 
-class FormFields extends Fieldtype
+class StatamicFormFields extends Fieldtype
 {
-    protected $component = 'form_fields';
+    protected $component = 'statamic_form_fields';
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="activecampaign-merge-fields-fieldtype-wrapper">
+    <div class="statamic-form-fields-fieldtype-wrapper">
         <v-select
             append-to-body
             v-model="value"
@@ -26,6 +26,12 @@ export default {
         }
     },
 
+    computed: {
+        form() {
+            return StatamicConfig.urlPath.split('/')[1] ?? '';
+        },
+    },
+
     mounted() {
         this.refreshFields();
     },
@@ -33,12 +39,12 @@ export default {
     methods: {
         refreshFields() {
             this.$axios
-                .get(cp_url('/activecampaign/merge-fields'))
+                .get(cp_url(`/activecampaign/form-fields/${this.form}`))
                 .then(response => {
                     this.fields = response.data;
                 })
                 .catch(() => { this.fields = []; });
-        }
+        },
     }
 };
 </script>

@@ -9,6 +9,7 @@ use Statamic\Forms\Submission;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Statamic\Events\SubmissionCreated;
+use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
 
 class AddFromSubmission
@@ -17,40 +18,36 @@ class AddFromSubmission
 
     private Collection $config;
 
-    public function __construct()
+    public function __construct($data, ?array $config = null)
     {
-        $this->data = collect();
-        $this->config = collect();
+        $this->data = collect($data);
+        $this->config = collect($config);
     }
 
-    public function shouldHandle(Submission $submission)
+    public function hasFormConfig(Submission $submission): bool
     {
-        $configKey = 'forms';
-
         $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
 
-        if ($edition === 'pro') {
-            $site = Site::findByUrl(URL::previous()) ?? Site::default();
-            $configKey = "sites.{$site->handle()}";
-        }
+        $site = $edition === 'pro'
+            ? Site::findByUrl(URL::previous()) ?? Site::default()
+            : Site::default();
 
-        $this->config = collect(Arr::first(
-            config("statamic.activecampaign.{$configKey}", []),
-            fn (array $formConfig) => $formConfig['form'] == $submission->form()->handle()
-        ));
-
-        if ($this->config->isEmpty()) {
+        if (! $formConfig = FormConfig::find($submission->form()->handle(), $site->handle())) {
             return false;
         }
 
         $this->data = collect($submission->data());
 
-        return $this->hasConsent();
+        $this->config = collect($formConfig->fileData());
+
+        return true;
     }
 
     public function hasConsent(): bool
     {
-        $field = $this->config->get('consent_field', 'consent');
+        if (! $field = $this->config->get('consent_field')) {
+            return true;
+        }
 
         return filter_var(
             Arr::get(Arr::wrap($this->data->get($field, false)), 0, false),
@@ -60,24 +57,23 @@ class AddFromSubmission
 
     public function handle(SubmissionCreated $event): void
     {
-        if (! $this->shouldHandle($event->submission)) {
+        if (! $this->hasFormConfig($event->submission)) {
             return;
         }
 
-        // Create or update contact.
-        $contact = $this->syncContact();
+        if (! $this->hasConsent()) {
+            return;
+        }
 
-        // Exit if no contact was created or updated.
-        if (! $contact) return;
+        if (! $contact = $this->syncContact()) {
+            return;
+        }
 
-        // Get contact ID.
-        $contactId = $contact['contact']['id'];
+        $contactId = Arr::get($contact, 'contact.id');
 
-        // Update list status for contact.
         $this->updateListStatus($contactId);
 
-        // Add optional tag to contact.
-        if ($this->config->has('tag')) {
+        if ($this->config->has('tag_id')) {
             $this->addTagToContact($contactId);
         }
     }
@@ -99,13 +95,13 @@ class AddFromSubmission
         });
 
         $standardData = $standardFields->mapWithKeys(function ($item) {
-            return [$item['activecampaign_field'] => $this->data->get($item['field_name'])];
+            return [$item['activecampaign_field'] => $this->data->get($item['statamic_field'])];
         })->filter()->all();
 
         $customData = $customFields->map(function ($item) {
             return [
                 'field' => $item['activecampaign_field'],
-                'value' => $this->data->get($item['field_name'])
+                'value' => $this->data->get($item['statamic_field'])
             ];
         })->filter()->values()->all();
 
@@ -121,7 +117,7 @@ class AddFromSubmission
 
     private function addTagToContact($contactId): void
     {
-        $tagId = $this->config->get('tag');
+        $tagId = $this->config->get('tag_id');
 
         ActiveCampaign::addTagToContact($contactId, $tagId);
     }

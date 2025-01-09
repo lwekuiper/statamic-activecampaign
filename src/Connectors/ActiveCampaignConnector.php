@@ -1,13 +1,13 @@
 <?php
 
-namespace Lwekuiper\StatamicActivecampaign\Services;
+namespace Lwekuiper\StatamicActivecampaign\Connectors;
 
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Log;
 
-class ActiveCampaignService
+class ActiveCampaignConnector
 {
     protected $baseUrl;
     protected $key;
