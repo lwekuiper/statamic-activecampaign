@@ -18,10 +18,10 @@ class AddFromSubmission
 
     private Collection $config;
 
-    public function __construct($data, ?array $config = null)
+    public function __construct()
     {
-        $this->data = collect($data);
-        $this->config = collect($config);
+        $this->data = collect();
+        $this->config = collect();
     }
 
     public function hasFormConfig(Submission $submission): bool
