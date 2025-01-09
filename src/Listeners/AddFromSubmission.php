@@ -73,7 +73,7 @@ class AddFromSubmission
 
         $this->updateListStatus($contactId);
 
-        if ($this->config->has('tag_id')) {
+        if ($this->config->get('tag_id')) {
             $this->addTagToContact($contactId);
         }
     }
