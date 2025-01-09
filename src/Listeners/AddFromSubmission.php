@@ -18,17 +18,17 @@ class AddFromSubmission
 
     private Collection $config;
 
-    public function __construct()
+    public function __construct($data, ?array $config = null)
     {
-        $this->data = collect();
-        $this->config = collect();
+        $this->data = collect($data);
+        $this->config = collect($config);
     }
 
-    public function shouldHandle(Submission $submission)
+    public function hasFormConfig(Submission $submission): bool
     {
         $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
 
-        $site = ($edition === 'pro')
+        $site = $edition === 'pro'
             ? Site::findByUrl(URL::previous()) ?? Site::default()
             : Site::default();
 
@@ -36,16 +36,18 @@ class AddFromSubmission
             return false;
         }
 
-        $this->config = collect($formConfig->toArray());
-
         $this->data = collect($submission->data());
 
-        return $this->hasConsent();
+        $this->config = collect($formConfig->fileData());
+
+        return true;
     }
 
     public function hasConsent(): bool
     {
-        $field = $this->config->get('consent_field', 'consent');
+        if (! $field = $this->config->get('consent_field')) {
+            return true;
+        }
 
         return filter_var(
             Arr::get(Arr::wrap($this->data->get($field, false)), 0, false),
@@ -55,7 +57,11 @@ class AddFromSubmission
 
     public function handle(SubmissionCreated $event): void
     {
-        if (! $this->shouldHandle($event->submission)) {
+        if (! $this->hasFormConfig($event->submission)) {
+            return;
+        }
+
+        if (! $this->hasConsent()) {
             return;
         }
 
