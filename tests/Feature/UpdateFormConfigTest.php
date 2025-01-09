@@ -21,7 +21,7 @@ class UpdateFormConfigTest extends TestCase
         $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
         $user = tap(User::make()->assignRole('test')->makeSuper())->save();
 
-        $form = tap(Form::make('test'))->save();
+        $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listId(1)->consentField('consent')->tagId(1);
@@ -39,7 +39,7 @@ class UpdateFormConfigTest extends TestCase
             ->assertSuccessful();
 
         $this->assertCount(1, FormConfig::all());
-        $formConfig = FormConfig::find('test', 'default');
-        $this->assertEquals([2], $formConfig->fileData()['list_id']);
+        $formConfig = FormConfig::find('test_form', 'default');
+        $this->assertEquals(2, $formConfig->listId());
     }
 }

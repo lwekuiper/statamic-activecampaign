@@ -16,15 +16,6 @@ abstract class TestCase extends AddonTestCase
 
     protected string $addonServiceProvider = ServiceProvider::class;
 
-    protected function asAdmin()
-    {
-        $user = User::make();
-        $user->id(1)->email('l@urens.me')->makeSuper();
-        $this->be($user);
-
-        return $user;
-    }
-
     protected function setSites($sites)
     {
         Site::setSites($sites);

@@ -22,7 +22,7 @@ class EditFormConfigTest extends TestCase
         $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
         $user = User::make()->assignRole('test')->save();
 
-        $form = tap(Form::make('test'))->save();
+        $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listId(1)->consentField('consent')->tagId(1);

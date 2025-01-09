@@ -6,7 +6,6 @@ use Statamic\Support\Arr;
 use Statamic\Facades\Form;
 use Statamic\Facades\Site;
 use Statamic\Facades\User;
-use Statamic\Facades\Addon;
 use PHPUnit\Framework\Attributes\Test;
 use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
 use Lwekuiper\StatamicActivecampaign\Tests\FakesRoles;
@@ -34,8 +33,7 @@ class ViewFormConfigListingTest extends TestCase
         tap(Form::make('test'))->save();
         $this->assertCount(1, Form::all());
 
-        $this
-            ->actingAs($user)
+        $this->actingAs($user)
             ->get(cp_route('activecampaign.index'))
             ->assertUnauthorized();
 
@@ -50,26 +48,26 @@ class ViewFormConfigListingTest extends TestCase
 
         $this->assertCount(0, Form::all());
 
-        $one = tap(Form::make('test_one'))->save();
-        $two = tap(Form::make('test_two'))->save();
+        $form_one = tap(Form::make('form_one')->title('Form One'))->save();
+        $form_two = tap(Form::make('form_two')->title('Form Two'))->save();
 
-        $formConfig = tap(FormConfig::make()->form($one)->locale('default'));
+        $formConfig = tap(FormConfig::make()->form($form_one)->locale('default'));
         $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
         $formConfig->save();
 
         $this->actingAs($user)
             ->get(cp_route('activecampaign.index'))
             ->assertOk()
-            ->assertViewHas('forms', function ($forms) {
-                return $forms->count() === 2;
-            })
-            ->assertViewHas('forms', function ($forms) {
-                return Arr::get($forms, '0.id') === 'test_one'
-                    && Arr::get($forms, '0.edit_url') === url('/cp/activecampaign/test_one/edit')
-                    && Arr::get($forms, '0.list_id') === 1
-                    && Arr::get($forms, '0.tag_id') === 1
-                    && Arr::get($forms, '1.id') === 'test_two'
-                    && Arr::get($forms, '1.edit_url') === url('/cp/activecampaign/test_two/edit');
+            ->assertViewHas('formConfigs', fn ($formConfigs) => $formConfigs->count() === 2)
+            ->assertViewHas('formConfigs', function ($formConfigs) {
+                return Arr::get($formConfigs, '0.title') === 'Form One'
+                    && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit')
+                    && Arr::get($formConfigs, '0.list_id') === 1
+                    && Arr::get($formConfigs, '0.tag_id') === 1
+                    && Arr::get($formConfigs, '1.title') === 'Form Two'
+                    && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit')
+                    && Arr::get($formConfigs, '1.list_id') === null
+                    && Arr::get($formConfigs, '1.tag_id') === null;
             });
     }
 
@@ -83,6 +81,8 @@ class ViewFormConfigListingTest extends TestCase
             'nl' => ['url' => 'http://localhost/nl/', 'locale' => 'nl', 'name' => 'Dutch'],
         ]);
 
+        Site::setSelected('nl');
+
         $this->setTestRoles(['test' => [
             'access cp',
             'access en site',
@@ -91,28 +91,26 @@ class ViewFormConfigListingTest extends TestCase
         ]]);
         $user = User::make()->assignRole('test')->save();
 
-        Site::setSelected('nl');
+        $form_one = tap(Form::make('form_one')->title('Form One'))->save();
+        $form_two = tap(Form::make('form_two')->title('Form Two'))->save();
 
-        $one = tap(Form::make('test_one'))->save();
-        $two = tap(Form::make('test_two'))->save();
-
-        $formConfig = tap(FormConfig::make()->form($one)->locale('nl'));
+        $formConfig = tap(FormConfig::make()->form($form_one)->locale('nl'));
         $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
         $formConfig->save();
 
         $this->actingAs($user)
             ->get(cp_route('activecampaign.index'))
             ->assertOk()
-            ->assertViewHas('forms', fn ($forms) => $forms->count() === 2)
-            ->assertViewHas('forms', function ($forms) {
-                return Arr::get($forms, '0.id') === 'test_one'
-                    && Arr::get($forms, '0.edit_url') === url('/cp/activecampaign/test_one/edit?site=nl')
-                    && Arr::get($forms, '0.list_id') === 1
-                    && Arr::get($forms, '0.tag_id') === 1
-                    && Arr::get($forms, '1.id') === 'test_two'
-                    && Arr::get($forms, '1.edit_url') === url('/cp/activecampaign/test_two/edit?site=nl')
-                    && Arr::get($forms, '1.list_id') === null
-                    && Arr::get($forms, '1.tag_id') === null;
+            ->assertViewHas('formConfigs', fn ($formConfigs) => $formConfigs->count() === 2)
+            ->assertViewHas('formConfigs', function ($formConfigs) {
+                return Arr::get($formConfigs, '0.title') === 'Form One'
+                    && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit?site=nl')
+                    && Arr::get($formConfigs, '0.list_id') === 1
+                    && Arr::get($formConfigs, '0.tag_id') === 1
+                    && Arr::get($formConfigs, '1.title') === 'Form Two'
+                    && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit?site=nl')
+                    && Arr::get($formConfigs, '1.list_id') === null
+                    && Arr::get($formConfigs, '1.tag_id') === null;
             });
     }
 }

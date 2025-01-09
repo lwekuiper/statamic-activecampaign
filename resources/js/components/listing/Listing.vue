@@ -47,14 +47,14 @@ export default {
 
     props: {
         createFormUrl: { type: String, required: true },
-        initialForms: { type: Array, required: true },
+        initialFormConfigs: { type: Array, required: true },
         initialLocalizations: { type: Array, required: true },
         initialSite: { type: String, required: true },
     },
 
     data() {
         return {
-            rows: _.clone(this.initialForms),
+            rows: _.clone(this.initialFormConfigs),
             columns: [
                 { label: __('Form'), field: 'form' },
                 { label: __('List ID'), field: 'list_id' },
@@ -73,7 +73,7 @@ export default {
 
             this.$axios.get(localization.url).then(response => {
                 const data = response.data;
-                this.rows = data.forms;
+                this.rows = data.formConfigs;
                 this.localizations = data.localizations;
                 this.site = localization.handle;
                 this.loading = false;

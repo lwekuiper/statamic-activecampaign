@@ -79,19 +79,19 @@ class FormConfigRepositoryTest extends TestCase
     {
         $this->setUpSingleSite();
 
-        tap($this->repo->find('contact_us::default'), function ($formConfig) {
+        tap($this->repo->find('contact_us', 'default'), function ($formConfig) {
             $this->assertInstanceOf(FormConfig::class, $formConfig);
             $this->assertEquals('contact_us::default', $formConfig->id());
             $this->assertEquals('contact_us', $formConfig->handle());
         });
 
-        tap($this->repo->find('sign_up::default'), function ($formConfig) {
+        tap($this->repo->find('sign_up', 'default'), function ($formConfig) {
             $this->assertInstanceOf(FormConfig::class, $formConfig);
             $this->assertEquals('sign_up::default', $formConfig->id());
             $this->assertEquals('sign_up', $formConfig->handle());
         });
 
-        $this->assertNull($this->repo->find('unknown'));
+        $this->assertNull($this->repo->find('unknown', 'default'));
     }
 
     #[Test]
@@ -99,35 +99,35 @@ class FormConfigRepositoryTest extends TestCase
     {
         $this->setUpMultiSite();
 
-        tap($this->repo->find('contact_us::en'), function ($formConfig) {
+        tap($this->repo->find('contact_us', 'en'), function ($formConfig) {
             $this->assertInstanceOf(FormConfig::class, $formConfig);
             $this->assertEquals('contact_us::en', $formConfig->id());
             $this->assertEquals('contact_us', $formConfig->handle());
         });
 
-        tap($this->repo->find('contact_us::nl'), function ($formConfig) {
+        tap($this->repo->find('contact_us', 'nl'), function ($formConfig) {
             $this->assertInstanceOf(FormConfig::class, $formConfig);
             $this->assertEquals('contact_us::nl', $formConfig->id());
             $this->assertEquals('contact_us', $formConfig->handle());
         });
 
-        $this->assertNull($this->repo->find('contact_us::be'));
+        $this->assertNull($this->repo->find('contact_us', 'be'));
 
-        tap($this->repo->find('sign_up::en'), function ($formConfig) {
+        tap($this->repo->find('sign_up', 'en'), function ($formConfig) {
             $this->assertInstanceOf(FormConfig::class, $formConfig);
             $this->assertEquals('sign_up::en', $formConfig->id());
             $this->assertEquals('sign_up', $formConfig->handle());
         });
 
-        tap($this->repo->find('sign_up::nl'), function ($formConfig) {
+        tap($this->repo->find('sign_up', 'nl'), function ($formConfig) {
             $this->assertInstanceOf(FormConfig::class, $formConfig);
             $this->assertEquals('sign_up::nl', $formConfig->id());
             $this->assertEquals('sign_up', $formConfig->handle());
         });
 
-        $this->assertNull($this->repo->find('sign_up::be'));
+        $this->assertNull($this->repo->find('sign_up', 'be'));
 
-        $this->assertNull($this->repo->find('unknown'));
+        $this->assertNull($this->repo->find('unknown', 'default'));
     }
 
     #[Test]
@@ -181,13 +181,13 @@ class FormConfigRepositoryTest extends TestCase
 
         $formConfig->emailField('email')->listId(1);
 
-        $this->assertNull($this->repo->find('new::default'));
+        $this->assertNull($this->repo->find('new', 'default'));
 
         @unlink($this->directory.'/new.yaml');
 
         $this->repo->save($formConfig);
 
-        $this->assertNotNull($item = $this->repo->find('new::default'));
+        $this->assertNotNull($item = $this->repo->find('new', 'default'));
         $this->assertEquals(['email_field' => 'email', 'list_id' => 1], [
             'email_field' => $item->emailField(),
             'list_id' => $item->listId(),
@@ -210,13 +210,13 @@ class FormConfigRepositoryTest extends TestCase
 
         $formConfig->emailField('email')->listId(1);
 
-        $this->assertNull($this->repo->find('new::en'));
+        $this->assertNull($this->repo->find('new', 'en'));
 
         @unlink($this->directory.'/en/new.yaml');
 
         $this->repo->save($formConfig);
 
-        $this->assertNotNull($item = $this->repo->find('new::en'));
+        $this->assertNotNull($item = $this->repo->find('new', 'en'));
         $this->assertEquals('email', $item->emailField());
         $this->assertEquals(1, $item->listId());
         $this->assertFileDoesNotExist($this->directory.'/new.yaml');
@@ -234,7 +234,7 @@ class FormConfigRepositoryTest extends TestCase
         $formConfig->emailField('email')->listId(1);
         $this->repo->save($formConfig);
 
-        $this->assertNotNull($item = $this->repo->find('new::default'));
+        $this->assertNotNull($item = $this->repo->find('new', 'default'));
         $this->assertEquals('email', $item->emailField());
         $this->assertEquals(1, $item->listId());
         $this->assertFileExists($this->directory.'/new.yaml');
@@ -243,7 +243,7 @@ class FormConfigRepositoryTest extends TestCase
 
         $this->repo->delete($item);
 
-        $this->assertNull($this->repo->find('new::default'));
+        $this->assertNull($this->repo->find('new', 'default'));
         $this->assertFileDoesNotExist($this->directory.'/new.yaml');
 
         @unlink($this->directory.'/new.yaml');
@@ -258,13 +258,13 @@ class FormConfigRepositoryTest extends TestCase
         $formConfig->emailField('email')->listId(1);
         $this->repo->save($formConfig);
 
-        $this->assertNotNull($item = $this->repo->find('new::en'));
+        $this->assertNotNull($item = $this->repo->find('new', 'en'));
         $this->assertEquals('email', $item->emailField());
         $this->assertEquals(1, $item->listId());
 
         $this->repo->delete($item);
 
-        $this->assertNull($this->repo->find('new::en'));
+        $this->assertNull($this->repo->find('new', 'en'));
         $this->assertFileDoesNotExist($this->directory.'/en/new.yaml');
         @unlink($this->directory.'/new.yaml');
     }
@@ -274,7 +274,7 @@ class FormConfigRepositoryTest extends TestCase
     {
         $this->setUpSingleSite();
 
-        $formConfig = $this->repo->findOrFail('contact_us::default');
+        $formConfig = $this->repo->findOrFail('contact_us', 'default');
 
         $this->assertInstanceOf(FormConfig::class, $formConfig);
         $this->assertEquals('Contact Us', $formConfig->title());
@@ -286,8 +286,8 @@ class FormConfigRepositoryTest extends TestCase
         $this->setUpSingleSite();
 
         $this->expectException(FormConfigNotFoundException::class);
-        $this->expectExceptionMessage('Form Config [does-not-exist] not found');
+        $this->expectExceptionMessage('Form Config [does-not-exist::default] not found');
 
-        $this->repo->findOrFail('does-not-exist');
+        $this->repo->findOrFail('does-not-exist', 'default');
     }
 }

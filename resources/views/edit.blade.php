@@ -13,12 +13,12 @@
         title="{{ $title }}"
         initial-action="{{ $action }}"
         initial-delete-url="{{ $deleteUrl }}"
+        initial-listing-url="{{ $listingUrl }}"
         :blueprint="{{ json_encode($blueprint) }}"
         :initial-meta='{{ empty($meta) ? '{}' : json_encode($meta) }}'
         :initial-values='{{ empty($values) ? '{}' : json_encode($values) }}'
         :initial-localizations="{{ empty($localizations) ? '{}' : json_encode($localizations) }}"
-        initial-site="{{ $site }}"
-        listing-url="{{ cp_route('activecampaign.index') }}"
+        initial-site="{{ empty($locale) ? '' : $locale }}"
     ></activecampaign-publish-form>
 
 @stop

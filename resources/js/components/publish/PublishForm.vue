@@ -63,12 +63,12 @@ export default {
         title: String,
         initialAction: String,
         initialDeleteUrl: String,
+        initialListingUrl: String,
         blueprint: Object,
         initialMeta: Object,
         initialValues: Object,
         initialLocalizations: Array,
         initialSite: String,
-        listingUrl: String,
     },
 
     data() {
@@ -76,6 +76,7 @@ export default {
             localizing: false,
             action: this.initialAction,
             deleteUrl: this.initialDeleteUrl,
+            listingUrl: this.initialListingUrl,
             meta: _.clone(this.initialMeta),
             values: _.clone(this.initialValues),
             localizations: _.clone(this.initialLocalizations),
@@ -143,6 +144,7 @@ export default {
                 const data = response.data;
                 this.action = data.action;
                 this.deleteUrl = data.deleteUrl;
+                this.listingUrl = data.listingUrl;
                 this.values = data.values;
                 this.meta = data.meta;
                 this.localizations = data.localizations;

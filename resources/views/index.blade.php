@@ -4,11 +4,11 @@
 
 @section('content')
 
-    @unless($forms->isEmpty())
+    @unless($formConfigs->isEmpty())
 
         <activecampaign-listing
-            :initial-forms="{{ json_encode($forms) }}"
             create-form-url="{{ cp_route('forms.create') }}"
+            :initial-form-configs="{{ json_encode($formConfigs) }}"
             :initial-localizations="{{ empty($localizations) ? '{}' : json_encode($localizations) }}"
             initial-site="{{ empty($locale) ? '' : $locale }}"
         ></activecampaign-listing>
