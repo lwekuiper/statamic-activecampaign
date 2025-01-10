@@ -73,12 +73,6 @@ class ServiceProvider extends AddonServiceProvider
                 });
         });
 
-        Statamic::afterInstalled(function ($command) {
-            $command->call('vendor:publish', [
-                '--tag' => 'statamic-activecampaign-config',
-            ]);
-        });
-
         $formConfigStore = new FormConfigStore();
         $formConfigStore->directory(base_path('resources/activecampaign'));
         app(Stache::class)->registerStore($formConfigStore);

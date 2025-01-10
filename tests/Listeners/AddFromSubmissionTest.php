@@ -121,6 +121,7 @@ class AddFromSubmissionTest extends TestCase
         $listener = new AddFromSubmission($submission->data(), $formConfig->fileData());
 
         $reflectionMethod = new ReflectionMethod(AddFromSubmission::class, 'getMergeData');
+        $reflectionMethod->setAccessible(true);
         $mergeData = $reflectionMethod->invoke($listener);
 
         $this->assertEquals([
