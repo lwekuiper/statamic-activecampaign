@@ -2,12 +2,6 @@
 
 namespace Lwekuiper\StatamicActivecampaign;
 
-use Statamic\Statamic;
-use Statamic\Events\SubmissionCreated;
-use Statamic\Facades\CP\Nav;
-use Statamic\Facades\Form;
-use Statamic\Providers\AddonServiceProvider;
-use Statamic\Stache\Stache;
 use Lwekuiper\StatamicActivecampaign\Connectors\ActiveCampaignConnector;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignList;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignMergeFields;
@@ -16,6 +10,12 @@ use Lwekuiper\StatamicActivecampaign\Fieldtypes\StatamicFormFields;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigRepository;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigStore;
+use Statamic\Statamic;
+use Statamic\Events\SubmissionCreated;
+use Statamic\Facades\Form;
+use Statamic\Facades\CP\Nav;
+use Statamic\Providers\AddonServiceProvider;
+use Statamic\Stache\Stache;
 
 class ServiceProvider extends AddonServiceProvider
 {
@@ -71,6 +71,12 @@ class ServiceProvider extends AddonServiceProvider
                             ->can('edit', $form);
                     });
                 });
+        });
+
+        Statamic::afterInstalled(function ($command) {
+            $command->call('vendor:publish', [
+                '--tag' => 'statamic-activecampaign-config',
+            ]);
         });
 
         $formConfigStore = new FormConfigStore();
