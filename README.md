@@ -1,6 +1,9 @@
 # Subscribe forms to ActiveCampaign
 
-> This package provides an easy way to integrate ActiveCampaign with Statamic forms and allows for multi-site configurations with the Pro license.
+This package provides an easy way to integrate ActiveCampaign with Statamic forms and allows for multi-site configurations with the Pro edition.
+
+> **Note**
+> The Pro edition of this addon requires Statamic Pro to enable multi-site capabilities.
 
 ## Features
 
