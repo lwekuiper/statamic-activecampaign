@@ -32,7 +32,7 @@ class AddFromSubmissionTest extends TestCase
     #[Test]
     public function it_returns_true_when_consent_field_is_not_configured()
     {
-        $listener = new AddFromSubmission([]);
+        $listener = new AddFromSubmission();
 
         $hasConsent = $listener->hasConsent();
 
@@ -42,10 +42,16 @@ class AddFromSubmissionTest extends TestCase
     #[Test]
     public function it_returns_false_when_configured_consent_field_is_false()
     {
-        $formConfig = ['consent_field' => 'consent'];
-        $submissionData = ['consent' => false];
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['consent' => false]);
 
-        $listener = new AddFromSubmission($submissionData, $formConfig);
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->consentField('consent');
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
 
         $hasConsent = $listener->hasConsent();
 
@@ -55,10 +61,16 @@ class AddFromSubmissionTest extends TestCase
     #[Test]
     public function it_returns_true_when_configured_consent_field_is_true()
     {
-        $formConfig = ['consent_field' => 'consent'];
-        $submissionData = ['consent' => true];
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['consent' => true]);
 
-        $listener = new AddFromSubmission($submissionData, $formConfig);
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->consentField('consent');
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
 
         $hasConsent = $listener->hasConsent();
 
@@ -140,7 +152,8 @@ class AddFromSubmissionTest extends TestCase
         ]);
         $formConfig->save();
 
-        $listener = new AddFromSubmission($submission->data(), $formConfig->fileData());
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
 
         $reflectionMethod = new ReflectionMethod(AddFromSubmission::class, 'getMergeData');
         $reflectionMethod->setAccessible(true);
