@@ -2,9 +2,6 @@
 
 This package provides an easy way to integrate ActiveCampaign with Statamic forms and allows for multi-site configurations with the Pro edition.
 
-> **Note**
-> The Pro edition of this addon requires Statamic Pro to enable multi-site capabilities.
-
 ## Features
 
 This addon allows you to:
@@ -39,6 +36,19 @@ Set your ActiveCampaign API Key and URL in your `.env` file.
 ```yaml
 ACTIVECAMPAIGN_API_KEY=your-key-here
 ACTIVECAMPAIGN_API_URL=your-url-here
+```
+
+## Pro edition
+
+> **Note**
+> The Pro edition of this addon requires Statamic Pro to enable multi-site capabilities.
+
+After purchasing the pro edition, you can enable it by setting the edition of the addon to `'pro'` in the `config/statamic/editions.php` file of your project:
+
+```php
+    'addons' => [
+        'lwekuiper/statamic-activecampaign' => 'pro'
+    ],
 ```
 
 ## How to Use
