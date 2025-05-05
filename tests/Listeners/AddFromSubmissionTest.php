@@ -96,6 +96,28 @@ class AddFromSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function it_correctly_uses_email_field_from_config()
+    {
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+
+        $submission->data([
+            'custom_email_field' => 'john@example.com',
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('custom_email_field');
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        $email = $listener->getEmail();
+
+        $this->assertEquals('john@example.com', $email);
+    }
+
+    #[Test]
     public function it_correctly_prepares_merge_data_for_sync_contact()
     {
         $form = tap(Form::make('contact_us')->title('Contact Us'))->save();

@@ -24,6 +24,11 @@ class AddFromSubmission
         $this->config = collect();
     }
 
+    public function getEmail(): string
+    {
+        return $this->data->get($this->config->get('email_field', 'email'));
+    }
+
     public function hasFormConfig(Submission $submission): bool
     {
         $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
@@ -80,7 +85,7 @@ class AddFromSubmission
 
     private function syncContact(): ?array
     {
-        $email = $this->data->get('email');
+        $email = $this->getEmail();
         $mergeData = $this->getMergeData();
 
         return ActiveCampaign::syncContact($email, $mergeData);
