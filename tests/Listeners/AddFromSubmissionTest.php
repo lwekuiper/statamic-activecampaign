@@ -172,4 +172,62 @@ class AddFromSubmissionTest extends TestCase
         ], $mergeData);
     }
 
+    #[Test]
+    public function it_handles_array_fields()
+    {
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+
+        $submission->data([
+            'email' => 'john@example.com',
+            'interests' => ['Sports', 'Music', 'Reading'],
+            'skills' => ['PHP', '', 'JavaScript', null, 'Laravel'],
+            'empty_array' => [],
+            'null_values_only' => [null, '', null],
+            'mixed_empty' => ['Valid', '', null, 'Also Valid'],
+            'empty_string' => '',
+            'null_value' => null,
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listId(1);
+        $formConfig->mergeFields([
+            ['statamic_field' => 'email', 'activecampaign_field' => 'email'],
+            ['statamic_field' => 'first_name', 'activecampaign_field' => 'firstName'],
+            ['statamic_field' => 'last_name', 'activecampaign_field' => 'lastName'],
+            ['statamic_field' => 'interests', 'activecampaign_field' => 'interests'],
+            ['statamic_field' => 'skills', 'activecampaign_field' => 'skills'],
+            ['statamic_field' => 'empty_array', 'activecampaign_field' => 'empty_field'],
+            ['statamic_field' => 'null_values_only', 'activecampaign_field' => 'null_field'],
+            ['statamic_field' => 'mixed_empty', 'activecampaign_field' => 'mixed_field'],
+            ['statamic_field' => 'empty_string', 'activecampaign_field' => 'empty_string_field'],
+            ['statamic_field' => 'null_value', 'activecampaign_field' => 'null_field'],
+        ]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        $reflectionMethod = new ReflectionMethod(AddFromSubmission::class, 'getMergeData');
+        $reflectionMethod->setAccessible(true);
+        $mergeData = $reflectionMethod->invoke($listener);
+
+        $this->assertEquals([
+            'email' => 'john@example.com',
+            'fieldValues' => [
+                [
+                    'field' => 'interests',
+                    'value' => 'Sports, Music, Reading',
+                ],
+                [
+                    'field' => 'skills',
+                    'value' => 'PHP, JavaScript, Laravel',
+                ],
+                [
+                    'field' => 'mixed_field',
+                    'value' => 'Valid, Also Valid',
+                ],
+            ],
+        ], $mergeData);
+    }
 }
