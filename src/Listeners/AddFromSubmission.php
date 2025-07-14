@@ -107,9 +107,7 @@ class AddFromSubmission
             $fieldValue = $this->data->get($item['statamic_field']);
 
             if (is_array($fieldValue)) {
-                $fieldValue = implode(', ', array_filter($fieldValue, fn($value) => $value !== null && $value !== ''));
-            } elseif ($fieldValue === null) {
-                $fieldValue = '';
+                $fieldValue = implode(', ', array_filter($fieldValue));
             }
 
             return [
