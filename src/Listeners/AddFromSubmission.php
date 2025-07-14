@@ -104,11 +104,19 @@ class AddFromSubmission
         })->filter()->all();
 
         $customData = $customFields->map(function ($item) {
+            $fieldValue = $this->data->get($item['statamic_field']);
+
+            if (is_array($fieldValue)) {
+                $fieldValue = implode(', ', array_filter($fieldValue, fn($value) => $value !== null && $value !== ''));
+            } elseif ($fieldValue === null) {
+                $fieldValue = '';
+            }
+
             return [
                 'field' => $item['activecampaign_field'],
-                'value' => $this->data->get($item['statamic_field'])
+                'value' => (string) $fieldValue
             ];
-        })->filter()->values()->all();
+        })->filter(fn($item) => $item['value'] !== '')->values()->all();
 
         return array_merge($standardData, ['fieldValues' => $customData]);
     }
