@@ -5,6 +5,8 @@
 
 A powerful Statamic addon that seamlessly integrates your forms with ActiveCampaign, featuring automatic contact synchronization, custom field mapping, and multi-site support.
 
+> 💡 **Have an idea?** We'd love to hear it! Please [open a feature request](https://github.com/lwekuiper/statamic-activecampaign/issues/new?labels=enhancement) on GitHub.
+
 ## ✨ Features
 
 ### 🆓 Lite Edition
