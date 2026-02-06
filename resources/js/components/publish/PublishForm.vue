@@ -1,41 +1,145 @@
+<script setup>
+import { ref, computed } from 'vue';
+import axios from 'axios';
+import {
+    Header,
+    Dropdown,
+    DropdownMenu,
+    DropdownItem,
+    PublishContainer,
+    PublishTabs
+} from '@statamic/cms/ui';
+import SiteSelector from '../SiteSelector.vue';
+
+const props = defineProps({
+    title: String,
+    initialAction: String,
+    initialDeleteUrl: String,
+    initialListingUrl: String,
+    blueprint: Object,
+    initialMeta: Object,
+    initialValues: Object,
+    initialLocalizations: Array,
+    initialSite: String,
+});
+
+const container = ref(null);
+const deleter = ref(null);
+const localizing = ref(false);
+const action = ref(props.initialAction);
+const deleteUrl = ref(props.initialDeleteUrl);
+const listingUrl = ref(props.initialListingUrl);
+const meta = ref(props.initialMeta);
+const values = ref(props.initialValues);
+const localizations = ref(props.initialLocalizations);
+const site = ref(props.initialSite);
+const error = ref(null);
+const errors = ref({});
+const saving = ref(false);
+
+const isDirty = computed(() => Statamic.$dirty.has('base'));
+
+function clearErrors() {
+    error.value = null;
+    errors.value = {};
+}
+
+function save() {
+    if (!action.value) return;
+
+    saving.value = true;
+    clearErrors();
+
+    axios.patch(action.value, values.value).then(() => {
+        saving.value = false;
+        Statamic.$toast.success(__('Saved'));
+        container.value.saved();
+    }).catch(e => handleAxiosError(e));
+}
+
+function handleAxiosError(e) {
+    saving.value = false;
+    if (e.response && e.response.status === 422) {
+        const { message, errors: responseErrors } = e.response.data;
+        error.value = message;
+        errors.value = responseErrors;
+        Statamic.$toast.error(message);
+    } else {
+        const message = data_get(e, 'response.data.message');
+        Statamic.$toast.error(message || e);
+        console.log(e);
+    }
+}
+
+function localizationSelected(handle) {
+    const localization = localizations.value.find(l => l.handle === handle);
+    if (!localization || localization.active) return;
+
+    if (isDirty.value) {
+        if (!confirm(__('Are you sure? Unsaved changes will be lost.'))) {
+            return;
+        }
+    }
+
+    localizing.value = localization.handle;
+    window.history.replaceState({}, '', localization.url);
+
+    axios.get(localization.url).then(response => {
+        const data = response.data;
+        action.value = data.action;
+        deleteUrl.value = data.deleteUrl;
+        listingUrl.value = data.listingUrl;
+        values.value = data.values;
+        meta.value = data.meta;
+        localizations.value = data.localizations;
+        site.value = localization.handle;
+        localizing.value = false;
+        container.value.clearDirtyState();
+    });
+}
+
+// Global keyboard shortcut
+Statamic.$keys.bindGlobal(['mod+s'], e => {
+    e.preventDefault();
+    save();
+});
+</script>
+
 <template>
     <div>
-
-        <header class="mb-6">
-            <div class="flex items-center">
-                <h1 class="flex-1" v-text="title" />
-
-                <dropdown-list v-if="deleteUrl" class="rtl:ml-2 ltr:mr-2">
-                    <dropdown-item
+        <Header :title="title" icon="forms">
+            <Dropdown v-if="deleteUrl">
+                <DropdownMenu>
+                    <DropdownItem
                         :text="__('Delete Config')"
-                        class="warning"
-                        @click="$refs.deleter.confirm()"
-                    >
-                        <resource-deleter
-                            ref="deleter"
-                            :resourceTitle="title"
-                            :route="deleteUrl"
-                            :redirect="listingUrl">
-                        </resource-deleter>
-                    </dropdown-item>
-                </dropdown-list>
+                        variant="destructive"
+                        @click="deleter.confirm()"
+                    />
+                </DropdownMenu>
+            </Dropdown>
 
-                <site-selector
-                    v-if="localizations.length > 1"
-                    class="rtl:ml-4 ltr:mr-4"
-                    :sites="localizations"
-                    :value="site"
-                    @input="localizationSelected"
-                />
+            <resource-deleter
+                ref="deleter"
+                :resource-title="title"
+                :route="deleteUrl"
+                :redirect="listingUrl"
+            />
 
-                <button
-                    class="btn-primary min-w-100"
-                    @click.prevent="save"
-                    v-text="__('Save')" />
-            </div>
-        </header>
+            <SiteSelector
+                v-if="localizations.length > 1"
+                :sites="localizations"
+                :model-value="site"
+                @update:model-value="localizationSelected"
+            />
 
-        <publish-container
+            <ui-button
+                variant="primary"
+                :text="__('Save')"
+                @click="save"
+            />
+        </Header>
+
+        <PublishContainer
             ref="container"
             name="base"
             :blueprint="blueprint"
@@ -44,123 +148,10 @@
             v-model="values"
             v-slot="{ setFieldValue, setFieldMeta }"
         >
-            <publish-tabs
+            <PublishTabs
                 @updated="setFieldValue"
-                @meta-updated="setFieldMeta" />
-        </publish-container>
-
+                @meta-updated="setFieldMeta"
+            />
+        </PublishContainer>
     </div>
 </template>
-
-<script>
-import SiteSelector from '../../../../vendor/statamic/cms/resources/js/components/SiteSelector.vue';
-
-export default {
-
-    components: {SiteSelector},
-
-    props: {
-        title: String,
-        initialAction: String,
-        initialDeleteUrl: String,
-        initialListingUrl: String,
-        blueprint: Object,
-        initialMeta: Object,
-        initialValues: Object,
-        initialLocalizations: Array,
-        initialSite: String,
-    },
-
-    data() {
-        return {
-            localizing: false,
-            action: this.initialAction,
-            deleteUrl: this.initialDeleteUrl,
-            listingUrl: this.initialListingUrl,
-            meta: _.clone(this.initialMeta),
-            values: _.clone(this.initialValues),
-            localizations: _.clone(this.initialLocalizations),
-            site: this.initialSite,
-            error: null,
-            errors: {},
-        }
-    },
-
-    computed: {
-        isDirty() {
-            return this.$dirty.has('base');
-        },
-    },
-
-    methods: {
-
-        clearErrors() {
-            this.error = null;
-            this.errors = {};
-        },
-
-        save() {
-            if (!this.action) return;
-
-            this.saving = true;
-            this.clearErrors();
-
-            this.$axios.patch(this.action, this.values).then(response => {
-                this.saving = false;
-                this.$toast.success(__('Saved'));
-                this.$refs.container.saved();
-                this.$emit('saved', response);
-            }).catch(e => this.handleAxiosError(e));
-        },
-
-        handleAxiosError(e) {
-            this.saving = false;
-            if (e.response && e.response.status === 422) {
-                const { message, errors } = e.response.data;
-                this.error = message;
-                this.errors = errors;
-                this.$toast.error(message);
-            } else {
-                const message = data_get(e, 'response.data.message');
-                this.$toast.error(message || e);
-                console.log(e);
-            }
-        },
-
-        localizationSelected(localization) {
-            if (localization.active) return;
-
-            if (this.isDirty) {
-                if (! confirm(__('Are you sure? Unsaved changes will be lost.'))) {
-                    return;
-                }
-            }
-
-            this.localizing = localization.handle;
-
-            window.history.replaceState({}, '', localization.url);
-
-            this.$axios.get(localization.url).then(response => {
-                const data = response.data;
-                this.action = data.action;
-                this.deleteUrl = data.deleteUrl;
-                this.listingUrl = data.listingUrl;
-                this.values = data.values;
-                this.meta = data.meta;
-                this.localizations = data.localizations;
-                this.site = localization.handle;
-                this.localizing = false;
-                this.$nextTick(() => this.$refs.container.clearDirtyState());
-            })
-        },
-
-    },
-
-    created() {
-        this.$keys.bindGlobal(['mod+s'], e => {
-            e.preventDefault();
-            this.save();
-        });
-    },
-};
-</script>

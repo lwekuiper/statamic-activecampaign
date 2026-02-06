@@ -3,6 +3,7 @@
 namespace Lwekuiper\StatamicActivecampaign\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Statamic\Facades\Addon;
 use Statamic\Facades\Blueprint;
@@ -61,7 +62,18 @@ class FormConfigController extends CpController
             return $viewData;
         }
 
-        return view('statamic-activecampaign::index', $viewData);
+        if ($viewData['formConfigs']->isEmpty()) {
+            return Inertia::render('activecampaign::Empty', [
+                'createUrl' => cp_route('forms.create'),
+            ]);
+        }
+
+        return Inertia::render('activecampaign::Index', [
+            'createFormUrl' => cp_route('forms.create'),
+            'formConfigs' => $viewData['formConfigs'],
+            'localizations' => $viewData['localizations'] ?? [],
+            'site' => $viewData['locale'] ?? '',
+        ]);
     }
 
     public function edit(Request $request, Form $form)
@@ -103,7 +115,17 @@ class FormConfigController extends CpController
             return $viewData;
         }
 
-        return view('statamic-activecampaign::edit', $viewData);
+        return Inertia::render('activecampaign::Edit', [
+            'title' => $viewData['title'],
+            'action' => $viewData['action'],
+            'deleteUrl' => $viewData['deleteUrl'],
+            'listingUrl' => $viewData['listingUrl'],
+            'blueprint' => $viewData['blueprint'],
+            'values' => $viewData['values'],
+            'meta' => $viewData['meta'],
+            'localizations' => $viewData['localizations'] ?? [],
+            'site' => $viewData['locale'] ?? '',
+        ]);
     }
 
     public function update(Request $request, Form $form)

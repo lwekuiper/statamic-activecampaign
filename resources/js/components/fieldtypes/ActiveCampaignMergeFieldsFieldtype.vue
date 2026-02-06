@@ -1,18 +1,15 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
     value: { required: true },
-    meta: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['update:value']);
 
 const selected = ref(null);
 const fields = ref([]);
-
-const form = computed(() => props.meta.form ?? '');
 
 watch(selected, (val) => {
     emit('update:value', val);
@@ -25,7 +22,7 @@ onMounted(() => {
 
 function refreshFields() {
     axios
-        .get(cp_url(`/activecampaign/form-fields/${form.value}`))
+        .get(cp_url('/activecampaign/merge-fields'))
         .then(response => {
             fields.value = response.data;
         })
@@ -34,7 +31,7 @@ function refreshFields() {
 </script>
 
 <template>
-    <div class="statamic-form-fields-fieldtype-wrapper">
+    <div class="activecampaign-merge-fields-fieldtype-wrapper">
         <ui-combobox
             class="w-full"
             v-model="selected"

@@ -31,14 +31,14 @@ class EditFormConfigTest extends TestCase
         Http::fake(); // Fake any HTTP requests to the ActiveCampaign API.
 
         $this->actingAs($user)
-            ->get($formConfig->editUrl())
+            ->getJson($formConfig->editUrl())
             ->assertOk()
-            ->assertViewHas('values', collect([
+            ->assertJson(['values' => [
                 'email_field' => 'email',
                 'list_id' => [1],
                 'consent_field' => 'consent',
                 'tag_id' => [1],
                 'merge_fields' => [],
-            ]));
+            ]]);
     }
 }

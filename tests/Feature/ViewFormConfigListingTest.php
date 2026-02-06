@@ -56,19 +56,14 @@ class ViewFormConfigListingTest extends TestCase
         $formConfig->save();
 
         $this->actingAs($user)
-            ->get(cp_route('activecampaign.index'))
+            ->getJson(cp_route('activecampaign.index'))
             ->assertOk()
-            ->assertViewHas('formConfigs', fn ($formConfigs) => $formConfigs->count() === 2)
-            ->assertViewHas('formConfigs', function ($formConfigs) {
-                return Arr::get($formConfigs, '0.title') === 'Form One'
-                    && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit')
-                    && Arr::get($formConfigs, '0.list_id') === 1
-                    && Arr::get($formConfigs, '0.tag_id') === 1
-                    && Arr::get($formConfigs, '1.title') === 'Form Two'
-                    && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit')
-                    && Arr::get($formConfigs, '1.list_id') === null
-                    && Arr::get($formConfigs, '1.tag_id') === null;
-            });
+            ->assertJsonCount(2, 'formConfigs')
+            ->assertJson(['formConfigs' => [
+                ['title' => 'Form One', 'edit_url' => url('/cp/activecampaign/form_one/edit'), 'list_id' => 1, 'tag_id' => 1],
+                ['title' => 'Form Two', 'edit_url' => url('/cp/activecampaign/form_two/edit')],
+            ]])
+            ->assertJsonMissing(['formConfigs' => [1 => ['list_id' => 1]]]);
     }
 
     #[Test]
@@ -99,18 +94,13 @@ class ViewFormConfigListingTest extends TestCase
         $formConfig->save();
 
         $this->actingAs($user)
-            ->get(cp_route('activecampaign.index'))
+            ->getJson(cp_route('activecampaign.index'))
             ->assertOk()
-            ->assertViewHas('formConfigs', fn ($formConfigs) => $formConfigs->count() === 2)
-            ->assertViewHas('formConfigs', function ($formConfigs) {
-                return Arr::get($formConfigs, '0.title') === 'Form One'
-                    && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit?site=nl')
-                    && Arr::get($formConfigs, '0.list_id') === 1
-                    && Arr::get($formConfigs, '0.tag_id') === 1
-                    && Arr::get($formConfigs, '1.title') === 'Form Two'
-                    && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit?site=nl')
-                    && Arr::get($formConfigs, '1.list_id') === null
-                    && Arr::get($formConfigs, '1.tag_id') === null;
-            });
+            ->assertJsonCount(2, 'formConfigs')
+            ->assertJson(['formConfigs' => [
+                ['title' => 'Form One', 'edit_url' => url('/cp/activecampaign/form_one/edit?site=nl'), 'list_id' => 1, 'tag_id' => 1],
+                ['title' => 'Form Two', 'edit_url' => url('/cp/activecampaign/form_two/edit?site=nl')],
+            ]])
+            ->assertJsonMissing(['formConfigs' => [1 => ['list_id' => 1]]]);
     }
 }
