@@ -2,6 +2,17 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.0.0 (2026-02-06)
+
+### What's new
+- Statamic 6 support
+- Inertia.js pages replacing Blade views
+- Vue 3 composition API components
+
+### What's changed
+- Requires Statamic 6 and Laravel 12
+- Dropped support for Statamic 4/5 and Laravel 10/11
+
 ## 2.1.1 (2025-07-14)
 
 ### What's fixed
