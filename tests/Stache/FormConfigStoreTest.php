@@ -26,7 +26,7 @@ class FormConfigStoreTest extends TestCase
     #[Test]
     public function it_makes_form_config_instances_from_files()
     {
-        $contents = "email_field: email\nlist_id: 1";
+        $contents = "email_field: email\nlist_ids:\n  - 1";
         $item = $this->store->makeItemFromFile(Path::tidy($this->store->directory().'/test_form.yaml'), $contents);
 
         $this->assertInstanceOf(FormConfig::class, $item);
@@ -43,7 +43,7 @@ class FormConfigStoreTest extends TestCase
             'nl' => ['url' => 'https://example.com/nl/'],
         ]);
 
-        $contents = "email_field: email\nlist_id: 1";
+        $contents = "email_field: email\nlist_ids:\n  - 1";
         $item = $this->store->makeItemFromFile(Path::tidy($this->store->directory().'/nl/test_form.yaml'), $contents);
 
         $this->assertInstanceOf(FormConfig::class, $item);
@@ -66,7 +66,7 @@ class FormConfigStoreTest extends TestCase
     {
         $formConfig = FormConfigFacade::make()->form('test_form')
             ->emailField('email')
-            ->listId(1);
+            ->listIds([1]);
 
         $this->store->save($formConfig);
 
@@ -81,13 +81,43 @@ class FormConfigStoreTest extends TestCase
             'nl' => ['url' => 'https://example.com/nl/'],
         ]);
 
-        $enFormConfig = FormConfigFacade::make()->form('test_form')->locale('en')->emailField('email')->listId('1');
-        $nlFormConfig = FormConfigFacade::make()->form('test_form')->locale('nl')->emailField('email')->listId('2');
+        $enFormConfig = FormConfigFacade::make()->form('test_form')->locale('en')->emailField('email')->listIds(['1']);
+        $nlFormConfig = FormConfigFacade::make()->form('test_form')->locale('nl')->emailField('email')->listIds(['2']);
 
         $this->store->save($enFormConfig);
         $this->store->save($nlFormConfig);
 
         $this->assertStringEqualsFile(Path::tidy($this->store->directory().'/en/test_form.yaml'), $enFormConfig->fileContents());
         $this->assertStringEqualsFile(Path::tidy($this->store->directory().'/nl/test_form.yaml'), $nlFormConfig->fileContents());
+    }
+
+    #[Test]
+    public function it_migrates_legacy_list_id_to_list_ids()
+    {
+        $contents = "email_field: email\nlist_id: 1";
+        $item = $this->store->makeItemFromFile(Path::tidy($this->store->directory().'/test_form.yaml'), $contents);
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals([1], $item->listIds());
+    }
+
+    #[Test]
+    public function it_migrates_legacy_tag_id_to_tag_ids()
+    {
+        $contents = "email_field: email\ntag_id: 5";
+        $item = $this->store->makeItemFromFile(Path::tidy($this->store->directory().'/test_form.yaml'), $contents);
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals([5], $item->tagIds());
+    }
+
+    #[Test]
+    public function it_prefers_new_keys_over_legacy_keys()
+    {
+        $contents = "email_field: email\nlist_id: 1\nlist_ids:\n  - 2\n  - 3\ntag_id: 5\ntag_ids:\n  - 6\n  - 7";
+        $item = $this->store->makeItemFromFile(Path::tidy($this->store->directory().'/test_form.yaml'), $contents);
+
+        $this->assertEquals([2, 3], $item->listIds());
+        $this->assertEquals([6, 7], $item->tagIds());
     }
 }

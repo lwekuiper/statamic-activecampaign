@@ -20,8 +20,8 @@ const loading = ref(false);
 
 const columns = [
     { field: 'form', label: __('Form'), visible: true },
-    { field: 'list_id', label: __('List ID'), visible: true },
-    { field: 'tag_id', label: __('Tag ID'), visible: true },
+    { field: 'list_ids', label: __('List IDs'), visible: true },
+    { field: 'tag_ids', label: __('Tag IDs'), visible: true },
 ];
 
 function localizationSelected(handle) {
@@ -70,6 +70,12 @@ function localizationSelected(handle) {
                 <Link :href="form.edit_url" class="flex items-center gap-2">
                     {{ form.title }}
                 </Link>
+            </template>
+            <template #cell-list_ids="{ row: form }">
+                {{ form.list_ids?.join(', ') }}
+            </template>
+            <template #cell-tag_ids="{ row: form }">
+                {{ form.tag_ids?.join(', ') }}
             </template>
             <template #prepended-row-actions="{ row: form }">
                 <DropdownItem

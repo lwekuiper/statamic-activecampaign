@@ -3,6 +3,8 @@
 namespace Lwekuiper\StatamicActivecampaign\Tests\Listeners;
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
+use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
 use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
@@ -97,7 +99,7 @@ class AddFromSubmissionTest extends TestCase
         $submission = $form->makeSubmission();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->save();
 
         $listener = new AddFromSubmission($submission->data());
@@ -143,7 +145,7 @@ class AddFromSubmissionTest extends TestCase
         ]);
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->mergeFields([
             ['statamic_field' => 'email', 'activecampaign_field' => 'email'],
             ['statamic_field' => 'first_name', 'activecampaign_field' => 'firstName'],
@@ -190,7 +192,7 @@ class AddFromSubmissionTest extends TestCase
         ]);
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $formConfig->mergeFields([
             ['statamic_field' => 'email', 'activecampaign_field' => 'email'],
             ['statamic_field' => 'first_name', 'activecampaign_field' => 'firstName'],
@@ -229,5 +231,105 @@ class AddFromSubmissionTest extends TestCase
                 ],
             ],
         ], $mergeData);
+    }
+
+    #[Test]
+    public function it_adds_multiple_tags_to_contact()
+    {
+        Http::fake();
+
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['email' => 'john@example.com']);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listIds([1])->tagIds([10, 20, 30]);
+        $formConfig->save();
+
+        $spy = ActiveCampaign::spy();
+
+        $spy->shouldReceive('syncContact')->once()->andReturn(['contact' => ['id' => 1]]);
+        $spy->shouldReceive('updateListStatus')->once();
+        $spy->shouldReceive('addTagToContact')->times(3);
+
+        $listener = new AddFromSubmission();
+        $listener->handle(new SubmissionCreated($submission));
+
+        $spy->shouldHaveReceived('addTagToContact')->with(1, 10)->once();
+        $spy->shouldHaveReceived('addTagToContact')->with(1, 20)->once();
+        $spy->shouldHaveReceived('addTagToContact')->with(1, 30)->once();
+    }
+
+    #[Test]
+    public function it_skips_tags_when_tag_ids_is_empty()
+    {
+        Http::fake();
+
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['email' => 'john@example.com']);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listIds([1])->tagIds([]);
+        $formConfig->save();
+
+        $spy = ActiveCampaign::spy();
+
+        $spy->shouldReceive('syncContact')->once()->andReturn(['contact' => ['id' => 1]]);
+        $spy->shouldReceive('updateListStatus')->once();
+
+        $listener = new AddFromSubmission();
+        $listener->handle(new SubmissionCreated($submission));
+
+        $spy->shouldNotHaveReceived('addTagToContact');
+    }
+
+    #[Test]
+    public function it_adds_contact_to_multiple_lists()
+    {
+        Http::fake();
+
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['email' => 'john@example.com']);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listIds([1, 2, 3])->tagIds([]);
+        $formConfig->save();
+
+        $spy = ActiveCampaign::spy();
+
+        $spy->shouldReceive('syncContact')->once()->andReturn(['contact' => ['id' => 1]]);
+        $spy->shouldReceive('updateListStatus')->times(3);
+
+        $listener = new AddFromSubmission();
+        $listener->handle(new SubmissionCreated($submission));
+
+        $spy->shouldHaveReceived('updateListStatus')->with(1, 1)->once();
+        $spy->shouldHaveReceived('updateListStatus')->with(1, 2)->once();
+        $spy->shouldHaveReceived('updateListStatus')->with(1, 3)->once();
+    }
+
+    #[Test]
+    public function it_skips_lists_when_list_ids_is_empty()
+    {
+        Http::fake();
+
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['email' => 'john@example.com']);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listIds([])->tagIds([]);
+        $formConfig->save();
+
+        $spy = ActiveCampaign::spy();
+
+        $spy->shouldReceive('syncContact')->once()->andReturn(['contact' => ['id' => 1]]);
+
+        $listener = new AddFromSubmission();
+        $listener->handle(new SubmissionCreated($submission));
+
+        $spy->shouldNotHaveReceived('updateListStatus');
     }
 }

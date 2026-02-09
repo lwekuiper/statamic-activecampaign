@@ -52,7 +52,7 @@ class ViewFormConfigListingTest extends TestCase
         $form_two = tap(Form::make('form_two')->title('Form Two'))->save();
 
         $formConfig = tap(FormConfig::make()->form($form_one)->locale('default'));
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->save();
 
         $this->actingAs($user)
@@ -60,10 +60,10 @@ class ViewFormConfigListingTest extends TestCase
             ->assertOk()
             ->assertJsonCount(2, 'formConfigs')
             ->assertJson(['formConfigs' => [
-                ['title' => 'Form One', 'edit_url' => url('/cp/activecampaign/form_one/edit'), 'list_id' => 1, 'tag_id' => 1],
+                ['title' => 'Form One', 'edit_url' => url('/cp/activecampaign/form_one/edit'), 'list_ids' => [1], 'tag_ids' => [1]],
                 ['title' => 'Form Two', 'edit_url' => url('/cp/activecampaign/form_two/edit')],
             ]])
-            ->assertJsonMissing(['formConfigs' => [1 => ['list_id' => 1]]]);
+            ->assertJsonMissing(['formConfigs' => [1 => ['list_ids' => [1]]]]);
     }
 
     #[Test]
@@ -90,7 +90,7 @@ class ViewFormConfigListingTest extends TestCase
         $form_two = tap(Form::make('form_two')->title('Form Two'))->save();
 
         $formConfig = tap(FormConfig::make()->form($form_one)->locale('nl'));
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->save();
 
         $this->actingAs($user)
@@ -98,9 +98,9 @@ class ViewFormConfigListingTest extends TestCase
             ->assertOk()
             ->assertJsonCount(2, 'formConfigs')
             ->assertJson(['formConfigs' => [
-                ['title' => 'Form One', 'edit_url' => url('/cp/activecampaign/form_one/edit?site=nl'), 'list_id' => 1, 'tag_id' => 1],
+                ['title' => 'Form One', 'edit_url' => url('/cp/activecampaign/form_one/edit?site=nl'), 'list_ids' => [1], 'tag_ids' => [1]],
                 ['title' => 'Form Two', 'edit_url' => url('/cp/activecampaign/form_two/edit?site=nl')],
             ]])
-            ->assertJsonMissing(['formConfigs' => [1 => ['list_id' => 1]]]);
+            ->assertJsonMissing(['formConfigs' => [1 => ['list_ids' => [1]]]]);
     }
 }

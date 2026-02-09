@@ -67,14 +67,14 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfigDefault = FormConfig::make()->form($form)->locale('en');
-        $formConfigDefault->emailField('email')->listId(1);
+        $formConfigDefault->emailField('email')->listIds([1]);
         $formConfigDefault->save();
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.index', ['site' => 'nl']))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_id' => 1],
+                ['title' => 'Test Form', 'list_ids' => [1]],
             ]]);
     }
 
@@ -87,7 +87,7 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfigDefault = FormConfig::make()->form($form)->locale('en');
-        $formConfigDefault->emailField('email')->listId(1);
+        $formConfigDefault->emailField('email')->listIds([1]);
         $formConfigDefault->save();
 
         Http::fake();
@@ -96,7 +96,7 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form', 'site' => 'nl']))
             ->assertOk()
             ->assertJson(['values' => [
-                'list_id' => [1],
+                'list_ids' => [1],
             ]]);
     }
 
@@ -142,25 +142,25 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfigDefault = FormConfig::make()->form($form)->locale('en');
-        $formConfigDefault->emailField('email')->listId(1);
+        $formConfigDefault->emailField('email')->listIds([1]);
         $formConfigDefault->save();
 
         $formConfigNl = FormConfig::make()->form($form)->locale('nl');
-        $formConfigNl->emailField('email')->listId(2);
+        $formConfigNl->emailField('email')->listIds([2]);
         $formConfigNl->save();
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.index', ['site' => 'nl']))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_id' => 2],
+                ['title' => 'Test Form', 'list_ids' => [2]],
             ]]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.index', ['site' => 'en']))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_id' => 1],
+                ['title' => 'Test Form', 'list_ids' => [1]],
             ]]);
     }
 
@@ -174,11 +174,11 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfigDefault = FormConfig::make()->form($form)->locale('en');
-        $formConfigDefault->emailField('email')->listId(1);
+        $formConfigDefault->emailField('email')->listIds([1]);
         $formConfigDefault->save();
 
         $formConfigNl = FormConfig::make()->form($form)->locale('nl');
-        $formConfigNl->emailField('email')->listId(2);
+        $formConfigNl->emailField('email')->listIds([2]);
         $formConfigNl->save();
 
         Http::fake();
@@ -187,14 +187,14 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form', 'site' => 'nl']))
             ->assertOk()
             ->assertJson(['values' => [
-                'list_id' => [2],
+                'list_ids' => [2],
             ]]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form', 'site' => 'en']))
             ->assertOk()
             ->assertJson(['values' => [
-                'list_id' => [1],
+                'list_ids' => [1],
             ]]);
     }
 
@@ -248,11 +248,11 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfigDefault = FormConfig::make()->form($form)->locale('en');
-        $formConfigDefault->emailField('email')->listId(1);
+        $formConfigDefault->emailField('email')->listIds([1]);
         $formConfigDefault->save();
 
         $formConfigNl = FormConfig::make()->form($form)->locale('nl');
-        $formConfigNl->emailField('email')->listId(2);
+        $formConfigNl->emailField('email')->listIds([2]);
         $formConfigNl->save();
 
         $listener = new \Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission();
@@ -276,7 +276,7 @@ class EditionRestrictionTest extends TestCase
 
         // Only create config for nl site, not default en
         $formConfigNl = FormConfig::make()->form($form)->locale('nl');
-        $formConfigNl->emailField('email_address')->listId(2);
+        $formConfigNl->emailField('email_address')->listIds([2]);
         $formConfigNl->save();
 
         // Set the previous URL to the Dutch site
@@ -304,14 +304,14 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $formConfig->save();
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.index'))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_id' => 1],
+                ['title' => 'Test Form', 'list_ids' => [1]],
             ]])
             ->assertJsonMissingPath('localizations')
             ->assertJsonMissingPath('locale');
@@ -325,7 +325,7 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $formConfig->save();
 
         Http::fake();
@@ -334,7 +334,7 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form']))
             ->assertOk()
             ->assertJson(['values' => [
-                'list_id' => [1],
+                'list_ids' => [1],
             ]])
             ->assertJsonMissingPath('localizations')
             ->assertJsonMissingPath('locale');
@@ -349,14 +349,14 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $formConfig->save();
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.index'))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_id' => 1],
+                ['title' => 'Test Form', 'list_ids' => [1]],
             ]])
             ->assertJsonPath('locale', 'default')
             ->assertJsonCount(1, 'localizations')
@@ -374,7 +374,7 @@ class EditionRestrictionTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $formConfig->save();
 
         Http::fake();
@@ -383,7 +383,7 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form']))
             ->assertOk()
             ->assertJson(['values' => [
-                'list_id' => [1],
+                'list_ids' => [1],
             ]])
             ->assertJsonPath('locale', 'default')
             ->assertJsonCount(1, 'localizations')
@@ -406,9 +406,9 @@ class EditionRestrictionTest extends TestCase
         $this->actingAs($user)
             ->patchJson(cp_route('activecampaign.update', ['form' => 'test_form', 'site' => 'nl']), [
                 'email_field' => 'email',
-                'list_id' => [1],
+                'list_ids' => [1],
                 'consent_field' => null,
-                'tag_id' => [],
+                'tag_ids' => [],
                 'merge_fields' => [],
             ])
             ->assertSuccessful();
@@ -428,7 +428,7 @@ class EditionRestrictionTest extends TestCase
 
         // Create config for default site
         $formConfig = FormConfig::make()->form($form)->locale('en');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $formConfig->save();
 
         // DELETE with ?site=nl, but lite should delete from default site (en)
@@ -453,9 +453,9 @@ class EditionRestrictionTest extends TestCase
         $this->actingAs($user)
             ->patchJson(cp_route('activecampaign.update', ['form' => 'test_form', 'site' => 'nl']), [
                 'email_field' => 'email',
-                'list_id' => [2],
+                'list_ids' => [2],
                 'consent_field' => null,
-                'tag_id' => [],
+                'tag_ids' => [],
                 'merge_fields' => [],
             ])
             ->assertSuccessful();
@@ -463,7 +463,7 @@ class EditionRestrictionTest extends TestCase
         // Config should be saved to nl site
         $formConfig = FormConfig::find('test_form', 'nl');
         $this->assertNotNull($formConfig);
-        $this->assertEquals(2, $formConfig->listId());
+        $this->assertEquals([2], $formConfig->listIds());
 
         // en site should have no config
         $this->assertNull(FormConfig::find('test_form', 'en'));
@@ -480,11 +480,11 @@ class EditionRestrictionTest extends TestCase
 
         // Create configs for both sites
         $formConfigEn = FormConfig::make()->form($form)->locale('en');
-        $formConfigEn->emailField('email')->listId(1);
+        $formConfigEn->emailField('email')->listIds([1]);
         $formConfigEn->save();
 
         $formConfigNl = FormConfig::make()->form($form)->locale('nl');
-        $formConfigNl->emailField('email')->listId(2);
+        $formConfigNl->emailField('email')->listIds([2]);
         $formConfigNl->save();
 
         // DELETE with ?site=nl

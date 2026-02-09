@@ -76,10 +76,12 @@ class AddFromSubmission
 
         $contactId = Arr::get($contact, 'contact.id');
 
-        $this->updateListStatus($contactId);
+        foreach ($this->config->get('list_ids', []) as $listId) {
+            $this->updateListStatus($contactId, $listId);
+        }
 
-        if ($this->config->get('tag_id')) {
-            $this->addTagToContact($contactId);
+        foreach ($this->config->get('tag_ids', []) as $tagId) {
+            $this->addTagToContact($contactId, $tagId);
         }
     }
 
@@ -119,17 +121,13 @@ class AddFromSubmission
         return array_merge($standardData, ['fieldValues' => $customData]);
     }
 
-    private function updateListStatus($contactId): void
+    private function updateListStatus($contactId, $listId): void
     {
-        $listId = $this->config->get('list_id');
-
         ActiveCampaign::updateListStatus($contactId, $listId);
     }
 
-    private function addTagToContact($contactId): void
+    private function addTagToContact($contactId, $tagId): void
     {
-        $tagId = $this->config->get('tag_id');
-
         ActiveCampaign::addTagToContact($contactId, $tagId);
     }
 }

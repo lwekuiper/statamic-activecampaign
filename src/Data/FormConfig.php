@@ -21,8 +21,8 @@ class FormConfig implements Localization
     protected $handle;
     protected $emailField;
     protected $consentField;
-    protected $listId;
-    protected $tagId;
+    protected $listIds = [];
+    protected $tagIds = [];
     protected $mergeFields = [];
 
     public function form($form = null)
@@ -64,14 +64,14 @@ class FormConfig implements Localization
         return $this->fluentlyGetOrSet('consentField')->args(func_get_args());
     }
 
-    public function listId($listId = null)
+    public function listIds($listIds = null)
     {
-        return $this->fluentlyGetOrSet('listId')->args(func_get_args());
+        return $this->fluentlyGetOrSet('listIds')->args(func_get_args());
     }
 
-    public function tagId($tagId = null)
+    public function tagIds($tagIds = null)
     {
-        return $this->fluentlyGetOrSet('tagId')->args(func_get_args());
+        return $this->fluentlyGetOrSet('tagIds')->args(func_get_args());
     }
 
     public function mergeFields($mergeFields = null)
@@ -135,8 +135,8 @@ class FormConfig implements Localization
         return [
             'email_field' => $this->emailField(),
             'consent_field' => $this->consentField(),
-            'list_id' => $this->listId(),
-            'tag_id' => $this->tagId(),
+            'list_ids' => $this->listIds(),
+            'tag_ids' => $this->tagIds(),
             'merge_fields' => $this->mergeFields(),
         ];
     }

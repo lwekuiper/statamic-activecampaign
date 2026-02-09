@@ -24,7 +24,7 @@ class DestroyFormConfigTest extends TestCase
         $form = tap(Form::make('test'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1)->consentField('consent')->tagId(1);
+        $formConfig->emailField('email')->listIds([1])->consentField('consent')->tagIds([1]);
         $formConfig->save();
 
         $this->assertCount(1, FormConfig::all());

@@ -25,7 +25,7 @@ class EditFormConfigTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1)->consentField('consent')->tagId(1);
+        $formConfig->emailField('email')->listIds([1])->consentField('consent')->tagIds([1]);
         $formConfig->save();
 
         Http::fake(); // Fake any HTTP requests to the ActiveCampaign API.
@@ -35,9 +35,9 @@ class EditFormConfigTest extends TestCase
             ->assertOk()
             ->assertJson(['values' => [
                 'email_field' => 'email',
-                'list_id' => [1],
+                'list_ids' => [1],
                 'consent_field' => 'consent',
-                'tag_id' => [1],
+                'tag_ids' => [1],
                 'merge_fields' => [],
             ]]);
     }

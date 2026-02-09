@@ -32,8 +32,8 @@ class FormConfigStore extends BasicStore
             ->initialPath($path)
             ->emailField(Arr::pull($data, 'email_field'))
             ->consentField(Arr::pull($data, 'consent_field'))
-            ->listId(Arr::pull($data, 'list_id'))
-            ->tagId(Arr::pull($data, 'tag_id'))
+            ->listIds(Arr::pull($data, 'list_ids', Arr::wrap(Arr::pull($data, 'list_id'))))
+            ->tagIds(Arr::pull($data, 'tag_ids', Arr::wrap(Arr::pull($data, 'tag_id'))))
             ->mergeFields(Arr::pull($data, 'merge_fields', []));
 
         $handle = explode('/', $handle);

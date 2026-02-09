@@ -13,16 +13,6 @@ tabs:
               validate: 'required'
               width: 50
           -
-            handle: list_id
-            field:
-              display: 'List'
-              instructions: 'The ActiveCampaign list you want to add the subscriber to.'
-              type: activecampaign_list
-              mode: select
-              max_items: 1
-              validate: 'required'
-              width: 50
-          -
             handle: consent_field
             field:
               display: 'Consent Field'
@@ -30,13 +20,19 @@ tabs:
               type: statamic_form_fields
               width: 50
           -
-            handle: tag_id
+            handle: list_ids
             field:
-              display: 'Tag'
-              instructions: 'The ActiveCampaign tag you want to add to the subscriber.'
+              display: 'Lists'
+              instructions: 'The ActiveCampaign lists you want to add the subscriber to.'
+              type: activecampaign_list
+              validate: 'required'
+              width: 50
+          -
+            handle: tag_ids
+            field:
+              display: 'Tags'
+              instructions: 'The ActiveCampaign tags you want to add to the subscriber.'
               type: activecampaign_tag
-              mode: select
-              max_items: 1
               width: 50
           -
             handle: merge_fields
