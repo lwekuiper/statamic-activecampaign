@@ -37,7 +37,7 @@ A powerful Statamic addon that seamlessly integrates your forms with ActiveCampa
 1. Navigate to **Tools > Addons** in your Statamic control panel
 2. Search for "ActiveCampaign"
 3. Click **Install**
-ca
+
 ### Via Composer
 ```bash
 composer require lwekuiper/statamic-activecampaign
@@ -88,166 +88,9 @@ After purchasing the Pro edition, enable it in your `config/statamic/editions.ph
 - **Site-Specific Routing**: Route submissions based on the current site
 - **Enhanced Flexibility**: Perfect for agencies managing multiple client sites
 
-## 📖 Usage Guide
+## 📖 Documentation
 
-### 1. Create Your Form
-
-First, create your Statamic [form](https://statamic.dev/forms#content) as usual. Here's an example form blueprint:
-
-```yaml
-title: Newsletter Signup
-fields:
-  - handle: email
-    field:
-      type: email
-      display: Email Address
-      validate: required|email
-  - handle: first_name
-    field:
-      type: text
-      display: First Name
-  - handle: interests
-    field:
-      type: checkboxes
-      display: Interests
-      options:
-        sports: Sports
-        music: Music
-        technology: Technology
-  - handle: consent
-    field:
-      type: toggle
-      display: I agree to receive marketing emails
-      validate: required|accepted
-```
-
-### 2. Configure ActiveCampaign Integration
-
-1. Navigate to **Tools > ActiveCampaign** in your control panel
-2. Click on the form you want to configure
-3. Configure the integration settings:
-   - **ActiveCampaign List**: Choose the target list
-   - **Email Field**: Map to your form's email field
-   - **Consent Field**: Map to your consent checkbox (for GDPR compliance)
-   - **Custom Fields**: Map form fields to ActiveCampaign custom fields
-   - **Tags**: Optionally assign tags to new contacts
-
-### 3. Field Mapping
-
-The addon supports mapping various field types:
-
-#### Standard Fields
-- Email → ActiveCampaign Email
-- First Name → ActiveCampaign First Name
-- Last Name → ActiveCampaign Last Name
-- Phone → ActiveCampaign Phone
-
-#### Custom Fields
-Map any form field to ActiveCampaign custom fields:
-- Text fields → Text custom fields
-- Select/Radio → Single-value custom fields
-- Checkboxes/Arrays → Comma-separated values
-
-#### Array Field Handling
-Multi-select fields are automatically converted to comma-separated strings:
-```php
-// Form submission: ['Sports', 'Music', 'Technology']
-// Sent to ActiveCampaign: "Sports, Music, Technology"
-```
-
-### 4. Front-End Implementation
-
-Use your form in templates as normal:
-
-```antlers
-{{ form:newsletter_signup }}
-    {{ if errors }}
-        <div class="alert alert-danger">
-            {{ errors }}
-                <p>{{ value }}</p>
-            {{ /errors }}
-        </div>
-    {{ /if }}
-
-    {{ if success }}
-        <div class="alert alert-success">
-            <p>Thank you! You've been subscribed to our newsletter.</p>
-        </div>
-    {{ /if }}
-
-    <div>
-        <label for="email">Email Address *</label>
-        <input type="email" name="email" id="email" required>
-    </div>
-
-    <div>
-        <label for="first_name">First Name</label>
-        <input type="text" name="first_name" id="first_name">
-    </div>
-
-    <div>
-        <label>
-            <input type="checkbox" name="consent" value="1" required>
-            I agree to receive marketing emails
-        </label>
-    </div>
-
-    <button type="submit">Subscribe</button>
-{{ /form:newsletter_signup }}
-```
-
-## 🔧 Advanced Configuration
-
-### Multi-Site Setup (Pro Edition)
-
-For multi-site setups, configure different settings per site:
-
-1. Each site can have its own ActiveCampaign list
-2. Different field mappings per locale
-3. Site-specific tags and custom fields
-
-### Custom Field Types
-
-The addon handles various Statamic field types:
-- **Text/Textarea**: Direct mapping
-- **Select/Radio**: Single value mapping
-- **Checkboxes**: Comma-separated string
-- **Date**: ISO format string
-- **Toggle**: Boolean to string conversion
-
-### Error Handling
-
-The addon gracefully handles:
-- Invalid API credentials
-- Network timeouts
-- Missing required fields
-- Invalid email addresses
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Form submissions not appearing in ActiveCampaign:**
-1. Check your API credentials in `.env`
-2. Verify the form configuration exists
-3. Ensure the email field is properly mapped
-4. Check if consent field is required and properly set
-
-**Multi-site configuration not working:**
-1. Confirm Pro edition is enabled
-2. Verify Statamic Pro is installed
-3. Check site-specific configurations
-
-**Array fields not formatting correctly:**
-1. Ensure fields contain valid, non-empty values
-2. Check ActiveCampaign custom field accepts text input
-
-### Debug Mode
-
-Enable logging by adding to your `.env`:
-```env
-LOG_LEVEL=debug
-```
+For the full usage guide — including form setup, field mapping, consent management, multi-site configuration, troubleshooting, and more — see [DOCUMENTATION.md](DOCUMENTATION.md).
 
 ## 🤝 Contributing
 
@@ -259,7 +102,7 @@ This addon requires a license for use in production. You may use it without a li
 
 ## 🆘 Support
 
-- **Documentation**: [Full documentation](https://github.com/lwekuiper/statamic-activecampaign)
+- **Documentation**: [DOCUMENTATION.md](DOCUMENTATION.md)
 - **Issues**: [GitHub Issues](https://github.com/lwekuiper/statamic-activecampaign/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/lwekuiper/statamic-activecampaign/discussions)
 
