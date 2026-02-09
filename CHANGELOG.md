@@ -2,6 +2,15 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.1.0 (2026-02-09)
+
+### What's new
+- Support for multiple lists and tags per form configuration
+
+### What's changed
+- `list_id` field renamed to `list_ids` (now accepts multiple lists)
+- `tag_id` field renamed to `tag_ids` (now accepts multiple tags)
+
 ## 3.0.0 (2026-02-06)
 
 ### What's new
