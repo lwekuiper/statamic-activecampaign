@@ -106,6 +106,10 @@ This addon requires a license for use in production. You may use it without a li
 - **Issues**: [GitHub Issues](https://github.com/lwekuiper/statamic-activecampaign/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/lwekuiper/statamic-activecampaign/discussions)
 
+## ⚖️ Disclaimer
+
+This addon is a third-party integration and is **not** affiliated with, endorsed by, or officially connected to ActiveCampaign, LLC. "ActiveCampaign" is a registered trademark of ActiveCampaign, LLC. All product names, logos, and brands are property of their respective owners.
+
 ---
 
 Made with ❤️ for the Statamic community
