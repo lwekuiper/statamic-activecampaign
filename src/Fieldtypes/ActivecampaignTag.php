@@ -15,7 +15,7 @@ class ActiveCampaignTag extends Relationship
 
     public function getIndexItems($request)
     {
-        $response = ActiveCampaign::listTags();
+        $response = ActiveCampaign::getTags();
 
         $tags = Arr::get($response, 'tags', []);
 

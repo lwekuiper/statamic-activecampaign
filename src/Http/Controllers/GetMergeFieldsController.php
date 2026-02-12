@@ -29,7 +29,7 @@ class GetMergeFieldsController extends Controller
             ]
         ];
 
-        $response = ActiveCampaign::listCustomFields();
+        $response = ActiveCampaign::getCustomFields();
 
         $customFields = collect(Arr::get($response, 'fields', []))
             ->map(fn ($customField) => [

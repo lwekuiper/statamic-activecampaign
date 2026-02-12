@@ -74,11 +74,11 @@ class ActiveCampaignConnector
         return $this->handleResponse($response, 'Failed to get list', ['id' => $id]);
     }
 
-    public function listTags(): ?array
+    public function getTags(): ?array
     {
         $response = $this->client()->get('tags', ['limit' => -1]);
 
-        return $this->handleResponse($response, 'Failed to list tags');
+        return $this->handleResponse($response, 'Failed to get tags');
     }
 
     public function getTag($id): ?array
@@ -88,11 +88,11 @@ class ActiveCampaignConnector
         return $this->handleResponse($response, 'Failed to get tag', ['id' => $id]);
     }
 
-    public function listCustomFields(): ?array
+    public function getCustomFields(): ?array
     {
         $response = $this->client()->get('fields');
 
-        return $this->handleResponse($response, 'Failed to list custom fields');
+        return $this->handleResponse($response, 'Failed to get custom fields');
     }
 
     private function client(): PendingRequest
