@@ -31,7 +31,11 @@ class ActiveCampaignList extends Relationship
             return [];
         }
 
-        if (! $list = Arr::get(ActiveCampaign::getList($id), 'list')) {
+        $response = ActiveCampaign::getLists();
+        $lists = Arr::get($response, 'lists', []);
+        $list = collect($lists)->firstWhere('id', $id);
+
+        if (! $list) {
             return [];
         }
 

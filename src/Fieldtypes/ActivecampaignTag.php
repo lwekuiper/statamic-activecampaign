@@ -31,13 +31,17 @@ class ActiveCampaignTag extends Relationship
             return [];
         }
 
-        if (! $list = Arr::get(ActiveCampaign::getTag($id), 'tag')) {
+        $response = ActiveCampaign::getTags();
+        $tags = Arr::get($response, 'tags', []);
+        $tag = collect($tags)->firstWhere('id', $id);
+
+        if (! $tag) {
             return [];
         }
 
         return [
-            'id' => $list['id'],
-            'title' => $list['tag'],
+            'id' => $tag['id'],
+            'title' => $tag['tag'],
         ];
     }
 }
