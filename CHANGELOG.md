@@ -2,6 +2,15 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.2.0 (2026-02-12)
+
+### What's fixed
+- Memoize API calls with Blink to eliminate redundant requests within a single lifecycle
+- Use collection endpoints in fieldtype lookups to prevent N+1 API calls
+
+### What's changed
+- Renamed internal `listTags` and `listCustomFields` methods to `getTags` and `getCustomFields`
+
 ## 3.1.0 (2026-02-09)
 
 ### What's new
