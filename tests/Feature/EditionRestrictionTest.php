@@ -74,7 +74,7 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.index', ['site' => 'nl']))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_ids' => [1]],
+                ['title' => 'Test Form', 'lists' => 1],
             ]]);
     }
 
@@ -93,7 +93,7 @@ class EditionRestrictionTest extends TestCase
         Http::fake();
 
         $this->actingAs($user)
-            ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form', 'site' => 'nl']))
+            ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form', 'site' => 'nl']))
             ->assertOk()
             ->assertJson(['values' => [
                 'list_ids' => [1],
@@ -126,7 +126,7 @@ class EditionRestrictionTest extends TestCase
         Http::fake();
 
         $this->actingAs($user)
-            ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form']))
+            ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form']))
             ->assertOk()
             ->assertJsonMissingPath('localizations')
             ->assertJsonMissingPath('locale');
@@ -153,14 +153,14 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.index', ['site' => 'nl']))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_ids' => [2]],
+                ['title' => 'Test Form', 'lists' => 1],
             ]]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.index', ['site' => 'en']))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_ids' => [1]],
+                ['title' => 'Test Form', 'lists' => 1],
             ]]);
     }
 
@@ -184,14 +184,14 @@ class EditionRestrictionTest extends TestCase
         Http::fake();
 
         $this->actingAs($user)
-            ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form', 'site' => 'nl']))
+            ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form', 'site' => 'nl']))
             ->assertOk()
             ->assertJson(['values' => [
                 'list_ids' => [2],
             ]]);
 
         $this->actingAs($user)
-            ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form', 'site' => 'en']))
+            ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form', 'site' => 'en']))
             ->assertOk()
             ->assertJson(['values' => [
                 'list_ids' => [1],
@@ -230,7 +230,7 @@ class EditionRestrictionTest extends TestCase
         Http::fake();
 
         $this->actingAs($user)
-            ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form', 'site' => 'en']))
+            ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form', 'site' => 'en']))
             ->assertOk()
             ->assertJsonPath('locale', 'en')
             ->assertJsonCount(2, 'localizations')
@@ -311,7 +311,7 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.index'))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_ids' => [1]],
+                ['title' => 'Test Form', 'lists' => 1],
             ]])
             ->assertJsonMissingPath('localizations')
             ->assertJsonMissingPath('locale');
@@ -331,7 +331,7 @@ class EditionRestrictionTest extends TestCase
         Http::fake();
 
         $this->actingAs($user)
-            ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form']))
+            ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form']))
             ->assertOk()
             ->assertJson(['values' => [
                 'list_ids' => [1],
@@ -356,7 +356,7 @@ class EditionRestrictionTest extends TestCase
             ->getJson(cp_route('activecampaign.index'))
             ->assertOk()
             ->assertJson(['formConfigs' => [
-                ['title' => 'Test Form', 'list_ids' => [1]],
+                ['title' => 'Test Form', 'lists' => 1],
             ]])
             ->assertJsonPath('locale', 'default')
             ->assertJsonCount(1, 'localizations')
@@ -380,7 +380,7 @@ class EditionRestrictionTest extends TestCase
         Http::fake();
 
         $this->actingAs($user)
-            ->getJson(cp_route('activecampaign.edit', ['form' => 'test_form']))
+            ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form']))
             ->assertOk()
             ->assertJson(['values' => [
                 'list_ids' => [1],
@@ -404,7 +404,7 @@ class EditionRestrictionTest extends TestCase
 
         // POST to update with ?site=nl, but lite should save to default site (en)
         $this->actingAs($user)
-            ->patchJson(cp_route('activecampaign.update', ['form' => 'test_form', 'site' => 'nl']), [
+            ->patchJson(cp_route('activecampaign.form-config.update',['form' => 'test_form', 'site' => 'nl']), [
                 'email_field' => 'email',
                 'list_ids' => [1],
                 'consent_field' => null,
@@ -433,7 +433,7 @@ class EditionRestrictionTest extends TestCase
 
         // DELETE with ?site=nl, but lite should delete from default site (en)
         $this->actingAs($user)
-            ->delete(cp_route('activecampaign.destroy', ['form' => 'test_form', 'site' => 'nl']))
+            ->delete(cp_route('activecampaign.form-config.destroy',['form' => 'test_form', 'site' => 'nl']))
             ->assertNoContent();
 
         // Default site config should be deleted (lite ignores nl param)
@@ -451,7 +451,7 @@ class EditionRestrictionTest extends TestCase
 
         // POST to update with ?site=nl
         $this->actingAs($user)
-            ->patchJson(cp_route('activecampaign.update', ['form' => 'test_form', 'site' => 'nl']), [
+            ->patchJson(cp_route('activecampaign.form-config.update',['form' => 'test_form', 'site' => 'nl']), [
                 'email_field' => 'email',
                 'list_ids' => [2],
                 'consent_field' => null,
@@ -465,8 +465,10 @@ class EditionRestrictionTest extends TestCase
         $this->assertNotNull($formConfig);
         $this->assertEquals([2], $formConfig->listIds());
 
-        // en site should have no config
-        $this->assertNull(FormConfig::find('test_form', 'en'));
+        // en site should have an auto-created empty config
+        $enConfig = FormConfig::find('test_form', 'en');
+        $this->assertNotNull($enConfig);
+        $this->assertTrue($enConfig->data()->isEmpty());
     }
 
     #[Test]
@@ -489,7 +491,7 @@ class EditionRestrictionTest extends TestCase
 
         // DELETE with ?site=nl
         $this->actingAs($user)
-            ->delete(cp_route('activecampaign.destroy', ['form' => 'test_form', 'site' => 'nl']))
+            ->delete(cp_route('activecampaign.form-config.destroy',['form' => 'test_form', 'site' => 'nl']))
             ->assertNoContent();
 
         // Only nl config should be deleted, en should remain

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 import axios from 'axios';
 import {
     Header,
@@ -21,6 +21,11 @@ const props = defineProps({
     initialValues: Object,
     initialLocalizations: Array,
     initialSite: String,
+    initialHasOrigin: Boolean,
+    initialOriginValues: Object,
+    initialOriginMeta: Object,
+    initialLocalizedFields: Array,
+    initialConfigureUrl: String,
 });
 
 const container = ref(null);
@@ -33,9 +38,15 @@ const meta = ref(props.initialMeta);
 const values = ref(props.initialValues);
 const localizations = ref(props.initialLocalizations);
 const site = ref(props.initialSite);
+const hasOrigin = ref(props.initialHasOrigin);
+const originValues = ref(props.initialOriginValues);
+const originMeta = ref(props.initialOriginMeta);
+const localizedFields = ref(props.initialLocalizedFields ?? []);
+const configureUrl = ref(props.initialConfigureUrl);
 const error = ref(null);
 const errors = ref({});
 const saving = ref(false);
+const pendingLocalization = ref(null);
 
 const isDirty = computed(() => Statamic.$dirty.has('base'));
 
@@ -50,7 +61,13 @@ function save() {
     saving.value = true;
     clearErrors();
 
-    axios.patch(action.value, values.value).then(() => {
+    const payload = { ...values.value };
+
+    if (hasOrigin.value) {
+        payload._localized = localizedFields.value;
+    }
+
+    axios.patch(action.value, payload).then(() => {
         saving.value = false;
         Statamic.$toast.success(__('Saved'));
         container.value.saved();
@@ -76,11 +93,19 @@ function localizationSelected(handle) {
     if (!localization || localization.active) return;
 
     if (isDirty.value) {
-        if (!confirm(__('Are you sure? Unsaved changes will be lost.'))) {
-            return;
-        }
+        pendingLocalization.value = localization;
+        return;
     }
 
+    switchToLocalization(localization);
+}
+
+function confirmSwitchLocalization() {
+    switchToLocalization(pendingLocalization.value);
+    pendingLocalization.value = null;
+}
+
+function switchToLocalization(localization) {
     localizing.value = localization.handle;
     window.history.replaceState({}, '', localization.url);
 
@@ -92,17 +117,26 @@ function localizationSelected(handle) {
         values.value = data.values;
         meta.value = data.meta;
         localizations.value = data.localizations;
+        hasOrigin.value = data.hasOrigin ?? false;
+        originValues.value = data.originValues ?? null;
+        originMeta.value = data.originMeta ?? null;
+        localizedFields.value = data.localizedFields ?? [];
+        configureUrl.value = data.configureUrl ?? null;
         site.value = localization.handle;
         localizing.value = false;
-        container.value.clearDirtyState();
+        nextTick(() => container.value.clearDirtyState());
     });
 }
 
+// Progress bar during save
+watch(saving, (val) => Statamic.$progress.loading('activecampaign-publish-form', val));
+
 // Global keyboard shortcut
-Statamic.$keys.bindGlobal(['mod+s'], e => {
+const saveKeyBinding = Statamic.$keys.bindGlobal(['mod+s'], e => {
     e.preventDefault();
     save();
 });
+onUnmounted(() => saveKeyBinding.destroy());
 </script>
 
 <template>
@@ -145,7 +179,10 @@ Statamic.$keys.bindGlobal(['mod+s'], e => {
             :blueprint="blueprint"
             :meta="meta"
             :errors="errors"
+            :origin-values="originValues"
+            :origin-meta="originMeta"
             v-model="values"
+            v-model:modified-fields="localizedFields"
             v-slot="{ setFieldValue, setFieldMeta }"
         >
             <PublishTabs
@@ -153,5 +190,15 @@ Statamic.$keys.bindGlobal(['mod+s'], e => {
                 @meta-updated="setFieldMeta"
             />
         </PublishContainer>
+
+        <confirmation-modal
+            :open="pendingLocalization"
+            :title="__('Unsaved Changes')"
+            :body-text="__('Are you sure? Unsaved changes will be lost.')"
+            :button-text="__('Continue')"
+            :danger="true"
+            @confirm="confirmSwitchLocalization"
+            @cancel="pendingLocalization = null"
+        />
     </div>
 </template>

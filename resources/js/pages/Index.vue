@@ -3,6 +3,7 @@ import { Head } from '@statamic/cms/inertia';
 
 defineProps({
     createFormUrl: String,
+    configureUrl: String,
     formConfigs: Array,
     localizations: Array,
     site: String,
@@ -13,6 +14,7 @@ defineProps({
     <Head :title="__('ActiveCampaign')" />
     <activecampaign-listing
         :create-form-url="createFormUrl"
+        :configure-url="configureUrl"
         :initial-form-configs="formConfigs"
         :initial-localizations="localizations"
         :initial-site="site"

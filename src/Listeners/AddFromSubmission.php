@@ -11,24 +11,25 @@ use Statamic\Forms\Submission;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Statamic\Events\SubmissionCreated;
-use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
+use Lwekuiper\StatamicActivecampaign\Data\FormConfig;
+use Lwekuiper\StatamicActivecampaign\Facades\FormConfig as FormConfigFacade;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
 
 class AddFromSubmission
 {
     private Collection $data;
 
-    private Collection $config;
+    private ?FormConfig $config;
 
     public function __construct()
     {
         $this->data = collect();
-        $this->config = collect();
+        $this->config = null;
     }
 
     public function getEmail(): string
     {
-        return $this->data->get($this->config->get('email_field', 'email'));
+        return $this->data->get($this->config?->value('email_field') ?? 'email');
     }
 
     public function hasFormConfig(Submission $submission): bool
@@ -39,20 +40,26 @@ class AddFromSubmission
             ? Site::findByUrl(URL::previous()) ?? Site::default()
             : Site::default();
 
-        if (! $formConfig = FormConfig::find($submission->form()->handle(), $site->handle())) {
+        $resolved = FormConfigFacade::findResolved($submission->form()->handle(), $site->handle());
+
+        if (! $resolved) {
+            return false;
+        }
+
+        // An empty config with no origin data means no real configuration exists
+        if ($resolved->values()->isEmpty()) {
             return false;
         }
 
         $this->data = collect($submission->data());
-
-        $this->config = collect($formConfig->fileData());
+        $this->config = $resolved;
 
         return true;
     }
 
     public function hasConsent(): bool
     {
-        if (! $field = $this->config->get('consent_field')) {
+        if (! $field = $this->config?->value('consent_field')) {
             return true;
         }
 
@@ -78,11 +85,11 @@ class AddFromSubmission
 
         $contactId = Arr::get($contact, 'contact.id');
 
-        foreach ($this->config->get('list_ids', []) as $listId) {
+        foreach ($this->config->value('list_ids') ?? [] as $listId) {
             $this->updateListStatus($contactId, $listId);
         }
 
-        foreach ($this->config->get('tag_ids', []) as $tagId) {
+        foreach ($this->config->value('tag_ids') ?? [] as $tagId) {
             $this->addTagToContact($contactId, $tagId);
         }
     }
@@ -97,7 +104,7 @@ class AddFromSubmission
 
     private function getMergeData(): array
     {
-        $mergeFields = $this->config->get('merge_fields', []);
+        $mergeFields = $this->config->value('merge_fields') ?? [];
 
         [$standardFields, $customFields] = collect($mergeFields)->partition(function ($item) {
             return in_array($item['activecampaign_field'], ['email', 'firstName', 'lastName', 'phone']);

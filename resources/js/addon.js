@@ -2,6 +2,7 @@ import ActiveCampaignListing from './components/listing/ActiveCampaignListing.vu
 import PublishForm from './components/publish/PublishForm.vue';
 import MergeFieldsField from './components/fieldtypes/ActiveCampaignMergeFieldsFieldtype.vue';
 import FormFieldsField from './components/fieldtypes/StatamicFormFieldsFieldtype.vue';
+import SitesField from './components/fieldtypes/ActiveCampaignSitesFieldtype.vue';
 import Index from './pages/Index.vue';
 import Empty from './pages/Empty.vue';
 import Edit from './pages/Edit.vue';
@@ -15,4 +16,5 @@ Statamic.booting(() => {
     Statamic.$components.register('activecampaign-publish-form', PublishForm);
     Statamic.$components.register('activecampaign_merge_fields-fieldtype', MergeFieldsField);
     Statamic.$components.register('statamic_form_fields-fieldtype', FormFieldsField);
+    Statamic.$components.register('activecampaign_sites-fieldtype', SitesField);
 });

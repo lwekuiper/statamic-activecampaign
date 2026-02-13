@@ -11,6 +11,11 @@ defineProps({
     meta: Object,
     localizations: Array,
     site: String,
+    hasOrigin: Boolean,
+    originValues: Object,
+    originMeta: Object,
+    localizedFields: Array,
+    configureUrl: String,
 });
 </script>
 
@@ -26,5 +31,10 @@ defineProps({
         :initial-values="values"
         :initial-localizations="localizations"
         :initial-site="site"
+        :initial-has-origin="hasOrigin"
+        :initial-origin-values="originValues"
+        :initial-origin-meta="originMeta"
+        :initial-localized-fields="localizedFields"
+        :initial-configure-url="configureUrl"
     />
 </template>

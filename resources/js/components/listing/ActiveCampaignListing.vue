@@ -1,5 +1,5 @@
 <script setup>
-import { Header, Listing, DropdownItem } from '@statamic/cms/ui';
+import { Header, Listing, Dropdown, DropdownMenu, DropdownItem, StatusIndicator } from '@statamic/cms/ui';
 import { Link } from '@statamic/cms/inertia';
 import SiteSelector from '../SiteSelector.vue';
 import { ref } from 'vue';
@@ -8,6 +8,7 @@ import ActiveCampaignIcon from '../../../svg/activecampaign.svg?raw';
 
 const props = defineProps({
     createFormUrl: { type: String, required: true },
+    configureUrl: { type: String, default: null },
     initialFormConfigs: { type: Array, required: true },
     initialLocalizations: { type: Array, required: true },
     initialSite: { type: String, required: true },
@@ -19,9 +20,9 @@ const site = ref(props.initialSite);
 const loading = ref(false);
 
 const columns = [
-    { field: 'form', label: __('Form'), visible: true },
-    { field: 'list_ids', label: __('List IDs'), visible: true },
-    { field: 'tag_ids', label: __('Tag IDs'), visible: true },
+    { field: 'title', label: __('Form'), visible: true },
+    { field: 'lists', label: __('Lists'), visible: true },
+    { field: 'tags', label: __('Tags'), visible: true },
 ];
 
 function localizationSelected(handle) {
@@ -35,7 +36,17 @@ function localizationSelected(handle) {
         localizations.value = response.data.localizations;
         site.value = localization.handle;
         loading.value = false;
+    }).catch(() => {
+        loading.value = false;
+        Statamic.$toast.error(__('Something went wrong'));
     });
+}
+
+function deleteRow(form) {
+    if (!confirm(__('Are you sure?'))) return;
+    axios.delete(form.delete_url)
+        .then(() => rows.value = rows.value.filter(r => r !== form))
+        .catch(() => Statamic.$toast.error(__('Something went wrong')));
 }
 
 </script>
@@ -43,6 +54,16 @@ function localizationSelected(handle) {
 <template>
     <div class="max-w-5xl mx-auto">
         <Header :title="__('ActiveCampaign')" :icon="ActiveCampaignIcon">
+            <Dropdown v-if="configureUrl" placement="left-start">
+                <DropdownMenu>
+                    <DropdownItem
+                        :text="__('Configure')"
+                        icon="cog"
+                        :href="configureUrl"
+                    />
+                </DropdownMenu>
+            </Dropdown>
+
             <SiteSelector
                 v-if="localizations.length > 1"
                 :sites="localizations"
@@ -66,22 +87,30 @@ function localizationSelected(handle) {
             :allow-search="false"
             preferences-prefix="activecampaign"
         >
-            <template #cell-form="{ row: form }">
-                <Link :href="form.edit_url" class="flex items-center gap-2">
-                    {{ form.title }}
+            <template #cell-title="{ row: form }">
+                <Link :href="form.edit_url" class="inline-flex items-center gap-2">
+                    <StatusIndicator :status="form.status" />
+                    <span>{{ form.title }}</span>
                 </Link>
             </template>
-            <template #cell-list_ids="{ row: form }">
-                {{ form.list_ids?.join(', ') }}
+            <template #cell-lists="{ row: form }">
+                {{ form.lists || '' }}
             </template>
-            <template #cell-tag_ids="{ row: form }">
-                {{ form.tag_ids?.join(', ') }}
+            <template #cell-tags="{ row: form }">
+                {{ form.tags || '' }}
             </template>
             <template #prepended-row-actions="{ row: form }">
                 <DropdownItem
                     :text="__('Edit')"
                     :href="form.edit_url"
                     icon="edit"
+                />
+                <DropdownItem
+                    v-if="form.delete_url"
+                    :text="__('Delete')"
+                    icon="trash"
+                    class="warning"
+                    @click="deleteRow(form)"
                 />
             </template>
         </Listing>

@@ -7,6 +7,7 @@ namespace Lwekuiper\StatamicActivecampaign\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
+use Lwekuiper\StatamicActivecampaign\Facades\AddonConfig;
 use Statamic\Facades\Addon;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Form as FormFacade;
@@ -27,31 +28,37 @@ class FormConfigController extends CpController
 
         $urlParams = $edition === 'pro' ? ['site' => $site] : [];
 
-        $forms = FormFacade::all()
-            ->mapWithKeys(fn ($form) => [
-                $form->handle() => [
-                    'title' => $form->title(),
-                    'edit_url' => cp_route('activecampaign.edit', ['form' => $form->handle(), ...$urlParams]),
-                ]
-            ]);
+        $forms = FormFacade::all();
 
-        $formConfigs = FormConfig::whereLocale($site)
-            ->mapWithKeys(fn ($formConfig) => [
-                $formConfig->handle() => [
-                    'list_ids' => $formConfig->listIds(),
-                    'tag_ids' => $formConfig->tagIds(),
-                    'delete_url' => $formConfig->deleteUrl(),
-                ]
-            ]);
+        $formConfigs = $forms->map(function ($form) use ($urlParams, $site) {
+            $localConfig = FormConfig::find($form->handle(), $site);
+            $resolved = FormConfig::findResolved($form->handle(), $site);
+
+            $resolvedValues = $resolved?->values() ?? collect();
+            $resolvedListIds = $resolvedValues->get('list_ids', []);
+            $resolvedTagIds = $resolvedValues->get('tag_ids', []);
+
+            $hasLocalData = $localConfig !== null && ! $localConfig->data()->isEmpty();
+            $hasValues = $resolvedValues->filter()->isNotEmpty();
+
+            return [
+                'title' => $form->title(),
+                'edit_url' => cp_route('activecampaign.form-config.edit', ['form' => $form->handle(), ...$urlParams]),
+                'lists' => count($resolvedListIds),
+                'tags' => count($resolvedTagIds),
+                'delete_url' => $hasLocalData ? cp_route('activecampaign.form-config.destroy', ['form' => $form->handle(), ...$urlParams]) : null,
+                'status' => $hasValues ? 'published' : 'draft',
+            ];
+        })->values();
 
         $viewData = [
-            'formConfigs' => $forms->mergeRecursive($formConfigs)->values()
+            'formConfigs' => $formConfigs,
         ];
 
         if ($edition === 'pro') {
             $viewData = array_merge($viewData, [
                 'locale' => $site,
-                'localizations' => Site::all()->map(fn ($localization) => [
+                'localizations' => $this->getEnabledSites()->map(fn ($localization) => [
                     'handle' => $localization->handle(),
                     'name' => $localization->name(),
                     'active' => $localization->handle() === $site,
@@ -64,7 +71,7 @@ class FormConfigController extends CpController
             return $viewData;
         }
 
-        if ($viewData['formConfigs']->isEmpty()) {
+        if ($forms->isEmpty()) {
             return Inertia::render('activecampaign::Empty', [
                 'createUrl' => cp_route('forms.create'),
             ]);
@@ -72,6 +79,7 @@ class FormConfigController extends CpController
 
         return Inertia::render('activecampaign::Index', [
             'createFormUrl' => cp_route('forms.create'),
+            'configureUrl' => cp_route('activecampaign.edit'),
             'formConfigs' => $viewData['formConfigs'],
             'localizations' => $viewData['localizations'] ?? [],
             'site' => $viewData['locale'] ?? '',
@@ -83,33 +91,53 @@ class FormConfigController extends CpController
         [$site, $edition] = $this->getAddonContext($request);
 
         $blueprint = $this->getBlueprint();
-        $fields = $blueprint->fields();
+        $formConfig = FormConfig::find($form->handle(), $site);
 
-        if ($formConfig = FormConfig::find($form->handle(), $site)) {
-            $fields = $fields->addValues($formConfig->fileData());
+        $hasOrigin = $edition === 'pro' && $formConfig && $formConfig->hasOrigin();
+
+        if ($hasOrigin) {
+            $originValues = $formConfig->origin()->values()->all();
+            $displayValues = $formConfig->values()->all();
+
+            $fields = $blueprint->fields()->addValues($displayValues)->preProcess();
+
+            [$originValues, $originMeta] = $this->extractFromFields($originValues, $blueprint);
+            $localizedFields = $formConfig->data()->keys()->all();
+        } else {
+            $fields = $blueprint->fields();
+
+            if ($formConfig) {
+                $fields = $fields->addValues($formConfig->data()->all());
+            }
+
+            $fields = $fields->preProcess();
         }
-
-        $fields = $fields->preProcess();
 
         $viewData = [
             'title' => $form->title(),
-            'action' => cp_route('activecampaign.update', ['form' => $form->handle(), 'site' => $site]),
+            'action' => cp_route('activecampaign.form-config.update', ['form' => $form->handle(), 'site' => $site]),
             'deleteUrl' => $formConfig?->deleteUrl(),
             'listingUrl' => cp_route('activecampaign.index', ['site' => $site]),
             'blueprint' => $blueprint->toPublishArray(),
             'values' => $fields->values(),
             'meta' => $fields->meta(),
+            'hasOrigin' => $hasOrigin,
+            'originValues' => $originValues ?? null,
+            'originMeta' => $originMeta ?? null,
+            'localizedFields' => $localizedFields ?? [],
         ];
 
         if ($edition === 'pro') {
             $viewData = array_merge($viewData, [
                 'locale' => $site,
-                'localizations' => Site::all()->map(fn ($localization) => [
+                'localizations' => $this->getEnabledSites()->map(fn ($localization) => [
                     'handle' => $localization->handle(),
                     'name' => $localization->name(),
                     'active' => $localization->handle() === $site,
-                    'url' => cp_route('activecampaign.edit', ['form' => $form->handle(), 'site' => $localization->handle()]),
+                    'origin' => ! AddonConfig::hasOrigin($localization->handle()),
+                    'url' => cp_route('activecampaign.form-config.edit', ['form' => $form->handle(), 'site' => $localization->handle()]),
                 ])->values()->all(),
+                'configureUrl' => cp_route('activecampaign.edit'),
             ]);
         }
 
@@ -127,31 +155,43 @@ class FormConfigController extends CpController
             'meta' => $viewData['meta'],
             'localizations' => $viewData['localizations'] ?? [],
             'site' => $viewData['locale'] ?? '',
+            'hasOrigin' => $viewData['hasOrigin'],
+            'originValues' => $viewData['originValues'],
+            'originMeta' => $viewData['originMeta'],
+            'localizedFields' => $viewData['localizedFields'],
+            'configureUrl' => $viewData['configureUrl'] ?? null,
         ]);
     }
 
     public function update(Request $request, Form $form)
     {
-        [$site] = $this->getAddonContext($request);
+        [$site, $edition] = $this->getAddonContext($request);
 
         $blueprint = $this->getBlueprint();
         $fields = $blueprint->fields()->addValues($request->all());
         $fields->validate();
 
-        $values = $fields->process()->values()->all();
+        $values = $fields->process()->values();
+
+        $hasOrigin = $edition === 'pro' && AddonConfig::hasOrigin($site);
+
+        if ($hasOrigin) {
+            $values = $values->only($request->input('_localized', []));
+        }
+
+        $values = $values->all();
 
         if (! $formConfig = FormConfig::find($form->handle(), $site)) {
             $formConfig = FormConfig::make()->form($form)->locale($site);
         }
 
-        $formConfig = $formConfig
-            ->emailField($values['email_field'])
-            ->consentField($values['consent_field'])
-            ->listIds($values['list_ids'])
-            ->tagIds($values['tag_ids'])
-            ->mergeFields($values['merge_fields']);
+        $formConfig->data($values);
 
         $formConfig->save();
+
+        if ($edition === 'pro') {
+            FormConfig::ensureLocalizationsExist($form->handle());
+        }
 
         return response()->json(['message' => __('Configuration saved')]);
     }
@@ -164,9 +204,23 @@ class FormConfigController extends CpController
             return $this->pageNotFound();
         }
 
-        $formConfig->delete();
+        if ($formConfig->hasOrigin()) {
+            $formConfig->data(collect())->save();
+        } else {
+            $formConfig->delete();
+        }
 
         return response('', 204);
+    }
+
+    private function extractFromFields(array $values, BlueprintContract $blueprint): array
+    {
+        $fields = $blueprint
+            ->fields()
+            ->addValues($values)
+            ->preProcess();
+
+        return [$fields->values()->all(), $fields->meta()->all()];
     }
 
     /**
@@ -184,11 +238,18 @@ class FormConfigController extends CpController
     }
 
     /**
+     * Get sites where ActiveCampaign is enabled.
+     */
+    private function getEnabledSites(): \Illuminate\Support\Collection
+    {
+        return Site::all()->filter(fn ($site) => AddonConfig::isEnabled($site->handle()));
+    }
+
+    /**
      * Get the blueprint.
      */
     private function getBlueprint(): BlueprintContract
     {
         return Blueprint::find('statamic-activecampaign::config');
     }
-
 }

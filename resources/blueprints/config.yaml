@@ -12,6 +12,7 @@ tabs:
               type: statamic_form_fields
               validate: 'required'
               width: 50
+              localizable: true
           -
             handle: consent_field
             field:
@@ -19,6 +20,7 @@ tabs:
               instructions: 'The form field that contains the consent of the subscriber.'
               type: statamic_form_fields
               width: 50
+              localizable: true
           -
             handle: list_ids
             field:
@@ -27,6 +29,7 @@ tabs:
               type: activecampaign_list
               validate: 'required'
               width: 50
+              localizable: true
           -
             handle: tag_ids
             field:
@@ -34,6 +37,7 @@ tabs:
               instructions: 'The ActiveCampaign tags you want to add to the subscriber.'
               type: activecampaign_tag
               width: 50
+              localizable: true
           -
             handle: merge_fields
             field:
@@ -45,6 +49,7 @@ tabs:
               fullscreen: false
               width: 100
               add_row: 'Add Merge Field'
+              localizable: true
               fields:
                 -
                   handle: statamic_field
