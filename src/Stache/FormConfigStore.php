@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lwekuiper\StatamicActivecampaign\Stache;
 
 use Statamic\Support\Arr;

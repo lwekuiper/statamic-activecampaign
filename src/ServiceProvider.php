@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lwekuiper\StatamicActivecampaign;
 
 use Lwekuiper\StatamicActivecampaign\Connectors\ActiveCampaignConnector;

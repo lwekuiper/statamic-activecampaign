@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lwekuiper\StatamicActivecampaign\Listeners;
 
 use Statamic\Facades\Site;
