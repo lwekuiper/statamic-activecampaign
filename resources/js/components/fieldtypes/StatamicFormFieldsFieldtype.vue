@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -9,17 +9,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value']);
 
-const selected = ref(null);
 const fields = ref([]);
 
 const form = computed(() => props.meta.form ?? '');
 
-watch(selected, (val) => {
-    emit('update:value', val);
-});
-
 onMounted(() => {
-    selected.value = props.value;
     refreshFields();
 });
 
@@ -37,7 +31,8 @@ function refreshFields() {
     <div class="statamic-form-fields-fieldtype-wrapper">
         <ui-combobox
             class="w-full"
-            v-model="selected"
+            :model-value="value"
+            @update:model-value="emit('update:value', $event)"
             :options="fields"
             optionValue="id"
             optionLabel="label"

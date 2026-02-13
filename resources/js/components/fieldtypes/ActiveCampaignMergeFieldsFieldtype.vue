@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -8,15 +8,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value']);
 
-const selected = ref(null);
 const fields = ref([]);
 
-watch(selected, (val) => {
-    emit('update:value', val);
-});
-
 onMounted(() => {
-    selected.value = props.value;
     refreshFields();
 });
 
@@ -34,7 +28,8 @@ function refreshFields() {
     <div class="activecampaign-merge-fields-fieldtype-wrapper">
         <ui-combobox
             class="w-full"
-            v-model="selected"
+            :model-value="value"
+            @update:model-value="emit('update:value', $event)"
             :options="fields"
             optionValue="id"
             optionLabel="label"
