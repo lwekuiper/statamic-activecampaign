@@ -2,6 +2,18 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.3.0 (2026-02-13)
+
+### What's new
+- Multi-site support with addon config for managing enabled sites and origins
+- ActiveCampaignSites fieldtype for site selection
+- Auto-creation of form config localizations when forms are saved
+- Form listing now shows all forms with published/draft status and summary counts
+
+### What's changed
+- Aligned Vue components with Statamic core patterns
+- Restructured route names with form-config prefix
+
 ## 3.2.1 (2026-02-13)
 
 ### What's changed
