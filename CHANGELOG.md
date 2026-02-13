@@ -2,6 +2,12 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.2.1 (2026-02-13)
+
+### What's changed
+- Added `declare(strict_types=1)` to all PHP files
+- Simplified fieldtype comboboxes to use direct v-model binding
+
 ## 3.2.0 (2026-02-12)
 
 ### What's fixed
