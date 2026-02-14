@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lwekuiper\StatamicActivecampaign\Connectors;
 
 use Illuminate\Http\Client\PendingRequest;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lwekuiper\StatamicActivecampaign\Exceptions;
 
 class FormConfigNotFoundException extends \Exception
