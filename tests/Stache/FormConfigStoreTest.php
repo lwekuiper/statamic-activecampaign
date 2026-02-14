@@ -26,7 +26,7 @@ class FormConfigStoreTest extends TestCase
     #[Test]
     public function it_makes_form_config_instances_from_files()
     {
-        $contents = "email_field: email\nlist_id: 1";
+        $contents = "email_field: email\nlist_ids:\n  - 1";
         $item = $this->store->makeItemFromFile(Path::tidy($this->store->directory().'/test_form.yaml'), $contents);
 
         $this->assertInstanceOf(FormConfig::class, $item);
@@ -43,7 +43,7 @@ class FormConfigStoreTest extends TestCase
             'nl' => ['url' => 'https://example.com/nl/'],
         ]);
 
-        $contents = "email_field: email\nlist_id: 1";
+        $contents = "email_field: email\nlist_ids:\n  - 1";
         $item = $this->store->makeItemFromFile(Path::tidy($this->store->directory().'/nl/test_form.yaml'), $contents);
 
         $this->assertInstanceOf(FormConfig::class, $item);
@@ -66,7 +66,7 @@ class FormConfigStoreTest extends TestCase
     {
         $formConfig = FormConfigFacade::make()->form('test_form')
             ->emailField('email')
-            ->listId(1);
+            ->listIds([1]);
 
         $this->store->save($formConfig);
 
@@ -81,8 +81,8 @@ class FormConfigStoreTest extends TestCase
             'nl' => ['url' => 'https://example.com/nl/'],
         ]);
 
-        $enFormConfig = FormConfigFacade::make()->form('test_form')->locale('en')->emailField('email')->listId('1');
-        $nlFormConfig = FormConfigFacade::make()->form('test_form')->locale('nl')->emailField('email')->listId('2');
+        $enFormConfig = FormConfigFacade::make()->form('test_form')->locale('en')->emailField('email')->listIds([1]);
+        $nlFormConfig = FormConfigFacade::make()->form('test_form')->locale('nl')->emailField('email')->listIds([2]);
 
         $this->store->save($enFormConfig);
         $this->store->save($nlFormConfig);

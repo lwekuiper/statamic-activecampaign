@@ -52,7 +52,7 @@ class ViewFormConfigListingTest extends TestCase
         $form_two = tap(Form::make('form_two')->title('Form Two'))->save();
 
         $formConfig = tap(FormConfig::make()->form($form_one)->locale('default'));
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->save();
 
         $this->actingAs($user)
@@ -62,12 +62,12 @@ class ViewFormConfigListingTest extends TestCase
             ->assertViewHas('formConfigs', function ($formConfigs) {
                 return Arr::get($formConfigs, '0.title') === 'Form One'
                     && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit')
-                    && Arr::get($formConfigs, '0.list_id') === 1
-                    && Arr::get($formConfigs, '0.tag_id') === 1
+                    && Arr::get($formConfigs, '0.list_ids') === [1]
+                    && Arr::get($formConfigs, '0.tag_ids') === [1]
                     && Arr::get($formConfigs, '1.title') === 'Form Two'
                     && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit')
-                    && Arr::get($formConfigs, '1.list_id') === null
-                    && Arr::get($formConfigs, '1.tag_id') === null;
+                    && Arr::get($formConfigs, '1.list_ids') === null
+                    && Arr::get($formConfigs, '1.tag_ids') === null;
             });
     }
 
@@ -95,7 +95,7 @@ class ViewFormConfigListingTest extends TestCase
         $form_two = tap(Form::make('form_two')->title('Form Two'))->save();
 
         $formConfig = tap(FormConfig::make()->form($form_one)->locale('nl'));
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->save();
 
         $this->actingAs($user)
@@ -105,12 +105,12 @@ class ViewFormConfigListingTest extends TestCase
             ->assertViewHas('formConfigs', function ($formConfigs) {
                 return Arr::get($formConfigs, '0.title') === 'Form One'
                     && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit?site=nl')
-                    && Arr::get($formConfigs, '0.list_id') === 1
-                    && Arr::get($formConfigs, '0.tag_id') === 1
+                    && Arr::get($formConfigs, '0.list_ids') === [1]
+                    && Arr::get($formConfigs, '0.tag_ids') === [1]
                     && Arr::get($formConfigs, '1.title') === 'Form Two'
                     && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit?site=nl')
-                    && Arr::get($formConfigs, '1.list_id') === null
-                    && Arr::get($formConfigs, '1.tag_id') === null;
+                    && Arr::get($formConfigs, '1.list_ids') === null
+                    && Arr::get($formConfigs, '1.tag_ids') === null;
             });
     }
 }

@@ -97,7 +97,7 @@ class AddFromSubmissionTest extends TestCase
         $submission = $form->makeSubmission();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->save();
 
         $listener = new AddFromSubmission($submission->data());
@@ -143,7 +143,7 @@ class AddFromSubmissionTest extends TestCase
         ]);
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->consentField('consent')->listId(1)->tagId(1);
+        $formConfig->emailField('email')->consentField('consent')->listIds([1])->tagIds([1]);
         $formConfig->mergeFields([
             ['statamic_field' => 'email', 'activecampaign_field' => 'email'],
             ['statamic_field' => 'first_name', 'activecampaign_field' => 'firstName'],
@@ -190,7 +190,7 @@ class AddFromSubmissionTest extends TestCase
         ]);
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $formConfig->mergeFields([
             ['statamic_field' => 'email', 'activecampaign_field' => 'email'],
             ['statamic_field' => 'first_name', 'activecampaign_field' => 'firstName'],

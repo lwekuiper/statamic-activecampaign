@@ -24,7 +24,7 @@ class UpdateFormConfigTest extends TestCase
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
         $formConfig = FormConfig::make()->form($form)->locale('default');
-        $formConfig->emailField('email')->listId(1)->consentField('consent')->tagId(1);
+        $formConfig->emailField('email')->listIds([1])->consentField('consent')->tagIds([1]);
         $formConfig->save();
 
         $this
@@ -32,14 +32,14 @@ class UpdateFormConfigTest extends TestCase
             ->actingAs($user)
             ->patchJson($formConfig->updateUrl(), [
                 'email_field' => 'email',
-                'list_id' => [2],
+                'list_ids' => [2],
                 'consent_field' => 'consent',
-                'tag_id' => [2]
+                'tag_ids' => [2]
             ])
             ->assertSuccessful();
 
         $this->assertCount(1, FormConfig::all());
         $formConfig = FormConfig::find('test_form', 'default');
-        $this->assertEquals(2, $formConfig->listId());
+        $this->assertEquals([2], $formConfig->listIds());
     }
 }

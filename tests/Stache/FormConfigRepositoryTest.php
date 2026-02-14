@@ -179,7 +179,7 @@ class FormConfigRepositoryTest extends TestCase
 
         $formConfig = FormConfigFacade::make()->form('new')->locale('default');
 
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
 
         $this->assertNull($this->repo->find('new', 'default'));
 
@@ -188,14 +188,14 @@ class FormConfigRepositoryTest extends TestCase
         $this->repo->save($formConfig);
 
         $this->assertNotNull($item = $this->repo->find('new', 'default'));
-        $this->assertEquals(['email_field' => 'email', 'list_id' => 1], [
+        $this->assertEquals(['email_field' => 'email', 'list_ids' => [1]], [
             'email_field' => $item->emailField(),
-            'list_id' => $item->listId(),
+            'list_ids' => $item->listIds(),
         ]);
         $this->assertFileExists($this->directory.'/new.yaml');
         $this->assertFileDoesNotExist($this->directory.'/default/new.yaml');
 
-        $contents = "email_field: email\nlist_id: 1\n";
+        $contents = "email_field: email\nlist_ids:\n  - 1\n";
         $this->assertEquals($contents, file_get_contents($this->directory.'/new.yaml'));
 
         @unlink($this->directory.'/new.yaml');
@@ -208,7 +208,7 @@ class FormConfigRepositoryTest extends TestCase
 
         $formConfig = FormConfigFacade::make()->form('new')->locale('en');
 
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
 
         $this->assertNull($this->repo->find('new', 'en'));
 
@@ -218,7 +218,7 @@ class FormConfigRepositoryTest extends TestCase
 
         $this->assertNotNull($item = $this->repo->find('new', 'en'));
         $this->assertEquals('email', $item->emailField());
-        $this->assertEquals(1, $item->listId());
+        $this->assertEquals([1], $item->listIds());
         $this->assertFileDoesNotExist($this->directory.'/new.yaml');
         $this->assertFileExists($this->directory.'/en/new.yaml');
 
@@ -231,14 +231,14 @@ class FormConfigRepositoryTest extends TestCase
         $this->setUpSingleSite();
 
         $formConfig = FormConfigFacade::make()->form('new')->locale('default');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $this->repo->save($formConfig);
 
         $this->assertNotNull($item = $this->repo->find('new', 'default'));
         $this->assertEquals('email', $item->emailField());
-        $this->assertEquals(1, $item->listId());
+        $this->assertEquals([1], $item->listIds());
         $this->assertFileExists($this->directory.'/new.yaml');
-        $contents = "email_field: email\nlist_id: 1\n";
+        $contents = "email_field: email\nlist_ids:\n  - 1\n";
         $this->assertEquals($contents, file_get_contents($this->directory.'/new.yaml'));
 
         $this->repo->delete($item);
@@ -255,12 +255,12 @@ class FormConfigRepositoryTest extends TestCase
         $this->setUpMultiSite();
 
         $formConfig = FormConfigFacade::make()->form('new')->locale('en');
-        $formConfig->emailField('email')->listId(1);
+        $formConfig->emailField('email')->listIds([1]);
         $this->repo->save($formConfig);
 
         $this->assertNotNull($item = $this->repo->find('new', 'en'));
         $this->assertEquals('email', $item->emailField());
-        $this->assertEquals(1, $item->listId());
+        $this->assertEquals([1], $item->listIds());
 
         $this->repo->delete($item);
 

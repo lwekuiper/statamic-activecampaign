@@ -37,8 +37,8 @@ class FormConfigController extends CpController
         $formConfigs = FormConfig::whereLocale($site)
             ->mapWithKeys(fn ($formConfig) => [
                 $formConfig->handle() => [
-                    'list_id' => $formConfig->listId(),
-                    'tag_id' => $formConfig->tagId(),
+                    'list_ids' => $formConfig->listIds(),
+                    'tag_ids' => $formConfig->tagIds(),
                     'delete_url' => $formConfig->deleteUrl(),
                 ]
             ]);
@@ -125,8 +125,8 @@ class FormConfigController extends CpController
         $formConfig = $formConfig
             ->emailField($values['email_field'])
             ->consentField($values['consent_field'])
-            ->listId($values['list_id'])
-            ->tagId($values['tag_id'])
+            ->listIds($values['list_ids'])
+            ->tagIds($values['tag_ids'])
             ->mergeFields($values['merge_fields']);
 
         $formConfig->save();
