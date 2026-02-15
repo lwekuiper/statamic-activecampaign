@@ -60,6 +60,15 @@ class FormConfig implements Localization
         return $this->form()->title();
     }
 
+    public function enabled($value = null)
+    {
+        if (func_num_args() === 0) {
+            return $this->get('enabled', true);
+        }
+
+        return $this->set('enabled', $value);
+    }
+
     public function emailField($value = null)
     {
         if (func_num_args() === 0) {

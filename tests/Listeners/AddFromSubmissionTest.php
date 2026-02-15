@@ -110,6 +110,40 @@ class AddFromSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function it_returns_false_when_form_config_is_disabled()
+    {
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->enabled(false)->emailField('email')->listIds([1])->tagIds([1]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission($submission->data());
+
+        $hasFormConfig = $listener->hasFormConfig($submission);
+
+        $this->assertFalse($hasFormConfig);
+    }
+
+    #[Test]
+    public function it_returns_true_when_form_config_is_explicitly_enabled()
+    {
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->enabled(true)->emailField('email')->listIds([1])->tagIds([1]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission($submission->data());
+
+        $hasFormConfig = $listener->hasFormConfig($submission);
+
+        $this->assertTrue($hasFormConfig);
+    }
+
+    #[Test]
     public function it_correctly_uses_email_field_from_config()
     {
         $form = tap(Form::make('contact_us')->title('Contact Us'))->save();

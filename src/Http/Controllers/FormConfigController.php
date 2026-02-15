@@ -39,7 +39,8 @@ class FormConfigController extends CpController
             $resolvedTagIds = $resolvedValues->get('tag_ids', []);
 
             $hasLocalData = $localConfig !== null && ! $localConfig->data()->isEmpty();
-            $hasValues = $resolvedValues->filter()->isNotEmpty();
+            $enabled = $resolvedValues->get('enabled', true);
+            $hasValues = $resolvedValues->except('enabled')->filter()->isNotEmpty();
 
             return [
                 'title' => $form->title(),
@@ -47,7 +48,7 @@ class FormConfigController extends CpController
                 'lists' => count($resolvedListIds),
                 'tags' => count($resolvedTagIds),
                 'delete_url' => $hasLocalData ? cp_route('activecampaign.form-config.destroy', ['form' => $form->handle(), ...$urlParams]) : null,
-                'status' => $hasValues ? 'published' : 'draft',
+                'status' => $enabled && $hasValues ? 'published' : 'draft',
             ];
         })->values();
 

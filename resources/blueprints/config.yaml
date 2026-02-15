@@ -5,6 +5,16 @@ tabs:
       -
         fields:
           -
+            handle: enabled
+            field:
+              display: 'Enabled'
+              instructions: 'Enable or disable the ActiveCampaign sync for this form.'
+              type: toggle
+              default: true
+              localizable: true
+              width: 100
+              listable: hidden
+          -
             handle: email_field
             field:
               display: 'Email Field'

@@ -236,4 +236,30 @@ class ViewFormConfigListingTest extends TestCase
                 ],
             ]]);
     }
+
+    #[Test]
+    public function it_shows_disabled_form_as_draft()
+    {
+        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $user = User::make()->assignRole('test')->save();
+
+        $form = tap(Form::make('contact')->title('Contact Form'))->save();
+
+        $formConfig = tap(FormConfig::make()->form($form)->locale('default'));
+        $formConfig->enabled(false)->emailField('email')->listIds([1])->tagIds([1]);
+        $formConfig->save();
+
+        $this->actingAs($user)
+            ->getJson(cp_route('activecampaign.index'))
+            ->assertOk()
+            ->assertJsonCount(1, 'formConfigs')
+            ->assertJson(['formConfigs' => [
+                [
+                    'title' => 'Contact Form',
+                    'lists' => 1,
+                    'tags' => 1,
+                    'status' => 'draft',
+                ],
+            ]]);
+    }
 }

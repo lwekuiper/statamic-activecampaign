@@ -51,6 +51,11 @@ class AddFromSubmission
             return false;
         }
 
+        // Check if the sync is explicitly disabled
+        if ($resolved->value('enabled') === false) {
+            return false;
+        }
+
         $this->data = collect($submission->data());
         $this->config = $resolved;
 
