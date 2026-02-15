@@ -4,7 +4,7 @@ namespace Lwekuiper\StatamicActivecampaign\Tests\Stache;
 
 use Lwekuiper\StatamicActivecampaign\Data\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig as FormConfigFacade;
-use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
+use Lwekuiper\StatamicActivecampaign\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Path;
 use Statamic\Facades\Stache;

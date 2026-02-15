@@ -4,7 +4,7 @@ namespace Lwekuiper\StatamicActivecampaign\Tests\Listeners;
 
 use Lwekuiper\StatamicActivecampaign\Data\AddonConfig;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
-use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
+use Lwekuiper\StatamicActivecampaign\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Form;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;

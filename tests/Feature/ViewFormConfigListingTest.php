@@ -5,7 +5,7 @@ namespace Lwekuiper\StatamicActivecampaign\Tests\Feature;
 use Lwekuiper\StatamicActivecampaign\Data\AddonConfig;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Tests\FakesRoles;
-use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
+use Lwekuiper\StatamicActivecampaign\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Form;
 use Statamic\Facades\Site;

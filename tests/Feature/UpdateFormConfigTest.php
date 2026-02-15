@@ -7,7 +7,7 @@ use Statamic\Facades\User;
 use PHPUnit\Framework\Attributes\Test;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Tests\FakesRoles;
-use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
+use Lwekuiper\StatamicActivecampaign\Tests\TestCase;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
 
 class UpdateFormConfigTest extends TestCase

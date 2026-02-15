@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
-use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
+use Lwekuiper\StatamicActivecampaign\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use Statamic\Events\SubmissionCreated;

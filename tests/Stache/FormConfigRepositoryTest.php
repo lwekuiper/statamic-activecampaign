@@ -8,7 +8,7 @@ use Lwekuiper\StatamicActivecampaign\Exceptions\FormConfigNotFoundException;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig as FormConfigFacade;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigRepository;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigStore;
-use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
+use Lwekuiper\StatamicActivecampaign\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Stache\Stache;
 
