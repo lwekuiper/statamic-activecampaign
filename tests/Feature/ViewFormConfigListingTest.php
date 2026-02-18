@@ -62,8 +62,8 @@ class ViewFormConfigListingTest extends TestCase
             ->assertViewHas('formConfigs', function ($formConfigs) {
                 return Arr::get($formConfigs, '0.title') === 'Form One'
                     && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit')
-                    && Arr::get($formConfigs, '0.list_ids') === [1]
-                    && Arr::get($formConfigs, '0.tag_ids') === [1]
+                    && Arr::get($formConfigs, '0.list_ids') === 1
+                    && Arr::get($formConfigs, '0.tag_ids') === 1
                     && Arr::get($formConfigs, '1.title') === 'Form Two'
                     && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit')
                     && Arr::get($formConfigs, '1.list_ids') === null
@@ -105,8 +105,8 @@ class ViewFormConfigListingTest extends TestCase
             ->assertViewHas('formConfigs', function ($formConfigs) {
                 return Arr::get($formConfigs, '0.title') === 'Form One'
                     && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit?site=nl')
-                    && Arr::get($formConfigs, '0.list_ids') === [1]
-                    && Arr::get($formConfigs, '0.tag_ids') === [1]
+                    && Arr::get($formConfigs, '0.list_ids') === 1
+                    && Arr::get($formConfigs, '0.tag_ids') === 1
                     && Arr::get($formConfigs, '1.title') === 'Form Two'
                     && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit?site=nl')
                     && Arr::get($formConfigs, '1.list_ids') === null
