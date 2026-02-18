@@ -51,8 +51,10 @@ tabs:
                   field:
                     display: Form Field
                     type: statamic_form_fields
+                    validate: required
                 -
                   handle: activecampaign_field
                   field:
                     display: 'Merge Field'
                     type: activecampaign_merge_fields
+                    validate: required
