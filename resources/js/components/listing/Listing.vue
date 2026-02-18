@@ -57,8 +57,8 @@ export default {
             rows: _.clone(this.initialFormConfigs),
             columns: [
                 { label: __('Form'), field: 'form' },
-                { label: __('List ID'), field: 'list_id' },
-                { label: __('Tag ID'), field: 'tag_id' },
+                { label: __('Lists'), field: 'list_ids' },
+                { label: __('Tags'), field: 'tag_ids' },
             ],
             localizations: _.clone(this.initialLocalizations),
             site: this.initialSite,

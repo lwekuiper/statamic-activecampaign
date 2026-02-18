@@ -37,8 +37,8 @@ class FormConfigController extends CpController
         $formConfigs = FormConfig::whereLocale($site)
             ->mapWithKeys(fn ($formConfig) => [
                 $formConfig->handle() => [
-                    'list_ids' => $formConfig->listIds(),
-                    'tag_ids' => $formConfig->tagIds(),
+                    'list_ids' => count($formConfig->listIds()),
+                    'tag_ids' => count($formConfig->tagIds()),
                     'delete_url' => $formConfig->deleteUrl(),
                 ]
             ]);
