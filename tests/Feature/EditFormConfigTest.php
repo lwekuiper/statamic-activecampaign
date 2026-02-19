@@ -28,7 +28,12 @@ class EditFormConfigTest extends TestCase
         $formConfig->emailField('email')->listIds([1])->consentField('consent')->tagIds([1]);
         $formConfig->save();
 
-        Http::fake(); // Fake any HTTP requests to the ActiveCampaign API.
+        Http::fake([
+            '*/api/3/lists*' => Http::response(['lists' => []], 200),
+            '*/api/3/tags*' => Http::response(['tags' => []], 200),
+            '*/api/3/fields*' => Http::response(['fields' => []], 200),
+            '*' => Http::response([], 200),
+        ]);
 
         $this->actingAs($user)
             ->get($formConfig->editUrl())
