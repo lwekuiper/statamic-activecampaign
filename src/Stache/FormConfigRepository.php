@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lwekuiper\StatamicActivecampaign\Stache;
 
+use Lwekuiper\StatamicActivecampaign\Data\AddonConfig;
 use Lwekuiper\StatamicActivecampaign\Data\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Data\FormConfigCollection;
 use Lwekuiper\StatamicActivecampaign\Exceptions\FormConfigNotFoundException;
@@ -48,6 +49,17 @@ class FormConfigRepository
         return $formConfig;
     }
 
+    public function findResolved(string $form, string $site): ?FormConfig
+    {
+        if ($config = $this->find($form, $site)) {
+            return $config;
+        }
+
+        $origin = app(AddonConfig::class)->originFor($site);
+
+        return $origin ? $this->findResolved($form, $origin) : null;
+    }
+
     public function whereForm($handle): FormConfigCollection
     {
         $keys = $this->store
@@ -70,6 +82,17 @@ class FormConfigRepository
             ->keys();
 
         return FormConfigCollection::make($this->store->getItems($keys));
+    }
+
+    public function ensureLocalizationsExist(string $formHandle): void
+    {
+        $enabledSites = app(AddonConfig::class)->sites()->keys();
+
+        $enabledSites->each(function ($siteHandle) use ($formHandle) {
+            if (! $this->find($formHandle, $siteHandle)) {
+                $this->make()->form($formHandle)->locale($siteHandle)->save();
+            }
+        });
     }
 
     public function save(FormConfig $formConfig): bool

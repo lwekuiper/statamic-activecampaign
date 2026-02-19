@@ -11,6 +11,7 @@ tabs:
               instructions: 'The form field that contains the email of the subscriber.'
               type: statamic_form_fields
               validate: 'required'
+              localizable: true
               width: 50
           -
             handle: consent_field
@@ -18,6 +19,7 @@ tabs:
               display: 'Consent Field'
               instructions: 'The form field that contains the consent of the subscriber.'
               type: statamic_form_fields
+              localizable: true
               width: 50
           -
             handle: list_ids
@@ -26,6 +28,7 @@ tabs:
               instructions: 'The ActiveCampaign lists you want to add the subscriber to.'
               type: activecampaign_list
               validate: 'required'
+              localizable: true
               width: 50
           -
             handle: tag_ids
@@ -33,6 +36,7 @@ tabs:
               display: 'Tags'
               instructions: 'The ActiveCampaign tags you want to add to the subscriber.'
               type: activecampaign_tag
+              localizable: true
               width: 50
           -
             handle: merge_fields
@@ -43,6 +47,7 @@ tabs:
               mode: table
               listable: hidden
               fullscreen: false
+              localizable: true
               width: 100
               add_row: 'Add Merge Field'
               fields:

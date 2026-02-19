@@ -6,7 +6,9 @@ namespace Lwekuiper\StatamicActivecampaign\Data;
 
 use Statamic\Contracts\Data\Localization;
 use Statamic\Contracts\Forms\Form;
+use Statamic\Data\ContainsData;
 use Statamic\Data\ExistsAsFile;
+use Statamic\Data\HasOrigin;
 use Statamic\Facades\Form as FormFacade;
 use Statamic\Facades\Site;
 use Statamic\Facades\Stache;
@@ -15,17 +17,19 @@ use Lwekuiper\StatamicActivecampaign\Facades;
 
 class FormConfig implements Localization
 {
+    use ContainsData;
     use ExistsAsFile;
     use FluentlyGetsAndSets;
+    use HasOrigin;
 
     protected $form;
     protected $locale;
-    protected $handle;
-    protected $emailField;
-    protected $consentField;
-    protected $listIds = [];
-    protected $tagIds = [];
-    protected $mergeFields = [];
+
+    public function __construct()
+    {
+        $this->data = collect();
+        $this->supplements = collect();
+    }
 
     public function form($form = null)
     {
@@ -56,29 +60,73 @@ class FormConfig implements Localization
         return $this->form()->title();
     }
 
-    public function emailField($emailField = null)
+    public function emailField($value = null)
     {
-        return $this->fluentlyGetOrSet('emailField')->args(func_get_args());
+        if (func_num_args() === 0) {
+            return $this->get('email_field');
+        }
+
+        return $this->set('email_field', $value);
     }
 
-    public function consentField($consentField = null)
+    public function consentField($value = null)
     {
-        return $this->fluentlyGetOrSet('consentField')->args(func_get_args());
+        if (func_num_args() === 0) {
+            return $this->get('consent_field');
+        }
+
+        return $this->set('consent_field', $value);
     }
 
-    public function listIds($listIds = null)
+    public function listIds($value = null)
     {
-        return $this->fluentlyGetOrSet('listIds')->args(func_get_args());
+        if (func_num_args() === 0) {
+            return $this->get('list_ids', []);
+        }
+
+        return $this->set('list_ids', $value);
     }
 
-    public function tagIds($tagIds = null)
+    public function tagIds($value = null)
     {
-        return $this->fluentlyGetOrSet('tagIds')->args(func_get_args());
+        if (func_num_args() === 0) {
+            return $this->get('tag_ids', []);
+        }
+
+        return $this->set('tag_ids', $value);
     }
 
-    public function mergeFields($mergeFields = null)
+    public function mergeFields($value = null)
     {
-        return $this->fluentlyGetOrSet('mergeFields')->args(func_get_args());
+        if (func_num_args() === 0) {
+            return $this->get('merge_fields', []);
+        }
+
+        return $this->set('merge_fields', $value);
+    }
+
+    public function origin($origin = null)
+    {
+        if (func_num_args() > 0) {
+            throw new \Exception('Origin is determined by site configuration.');
+        }
+
+        if (! $this->locale()) {
+            return null;
+        }
+
+        return $this->getOriginByString(
+            app(AddonConfig::class)->originFor($this->locale())
+        );
+    }
+
+    public function getOriginByString($origin)
+    {
+        if (! $origin) {
+            return null;
+        }
+
+        return Facades\FormConfig::find($this->handle(), $origin);
     }
 
     public function path()
@@ -93,17 +141,17 @@ class FormConfig implements Localization
 
     public function editUrl()
     {
-        return $this->cpUrl('activecampaign.edit');
+        return $this->cpUrl('activecampaign.form-config.edit');
     }
 
     public function updateUrl()
     {
-        return $this->cpUrl('activecampaign.update');
+        return $this->cpUrl('activecampaign.form-config.update');
     }
 
     public function deleteUrl()
     {
-        return $this->cpUrl('activecampaign.destroy');
+        return $this->cpUrl('activecampaign.form-config.destroy');
     }
 
     protected function cpUrl($route)
@@ -134,12 +182,11 @@ class FormConfig implements Localization
 
     public function fileData()
     {
-        return [
-            'email_field' => $this->emailField(),
-            'consent_field' => $this->consentField(),
-            'list_ids' => $this->listIds(),
-            'tag_ids' => $this->tagIds(),
-            'merge_fields' => $this->mergeFields(),
-        ];
+        return $this->data()->all();
+    }
+
+    protected function shouldRemoveNullsFromFileData()
+    {
+        return ! $this->hasOrigin();
     }
 }
