@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Lwekuiper\StatamicActivecampaign\Connectors;
 
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Statamic\Facades\Blink;
 
 class ActiveCampaignConnector
@@ -21,90 +19,73 @@ class ActiveCampaignConnector
         $this->key = config('statamic.activecampaign.api_key');
     }
 
-    public function syncContact($email, $data): ?array
+    public function isConfigured(): bool
+    {
+        return ! empty($this->baseUrl) && ! empty($this->key);
+    }
+
+    public function syncContact($email, $data): array
     {
         $contact = array_merge(['email' => $email], $data);
 
-        $response = $this->client()->post('contact/sync', [
-            'contact' => $contact
-        ]);
-
-        return $this->handleResponse($response, 'Failed to sync contact', $data);
+        return $this->client()->post('contact/sync', [
+            'contact' => $contact,
+        ])->json();
     }
 
-    public function updateListStatus($contactId, $listId): ?array
+    public function updateListStatus($contactId, $listId): array
     {
-        $response = $this->client()->post('contactLists', [
+        return $this->client()->post('contactLists', [
             'contactList' => [
                 'list' => $listId,
                 'contact' => $contactId,
-                'status' => 1
-            ]
-        ]);
-
-        return $this->handleResponse($response, 'Failed to update list status', [
-            'contact_id' => $contactId,
-            'list_id' => $listId
-        ]);
+                'status' => 1,
+            ],
+        ])->json();
     }
 
-    public function addTagToContact($contactId, $tagId): ?array
+    public function addTagToContact($contactId, $tagId): array
     {
-        $response = $this->client()->post('contactTags', [
+        return $this->client()->post('contactTags', [
             'contactTag' => [
                 'contact' => $contactId,
-                'tag' => $tagId
-            ]
-        ]);
-
-        return $this->handleResponse($response, 'Failed to add tag to contact', [
-            'contact_id' => $contactId,
-            'tag_id' => $tagId
-        ]);
+                'tag' => $tagId,
+            ],
+        ])->json();
     }
 
-    public function getLists(): ?array
+    public function getLists(): array
     {
         return Blink::once('activecampaign::lists', function () {
-            $response = $this->client()->get('lists', ['limit' => -1]);
-
-            return $this->handleResponse($response, 'Failed to get lists');
+            return $this->client()->get('lists', ['limit' => -1])->json();
         });
     }
 
-    public function getList($id): ?array
+    public function getList($id): array
     {
         return Blink::once("activecampaign::list::{$id}", function () use ($id) {
-            $response = $this->client()->get("lists/{$id}");
-
-            return $this->handleResponse($response, 'Failed to get list', ['id' => $id]);
+            return $this->client()->get("lists/{$id}")->json();
         });
     }
 
-    public function getTags(): ?array
+    public function getTags(): array
     {
         return Blink::once('activecampaign::tags', function () {
-            $response = $this->client()->get('tags', ['limit' => -1]);
-
-            return $this->handleResponse($response, 'Failed to get tags');
+            return $this->client()->get('tags', ['limit' => -1])->json();
         });
     }
 
-    public function getTag($id): ?array
+    public function getTag($id): array
     {
         return Blink::once("activecampaign::tag::{$id}", function () use ($id) {
-            $response = $this->client()->get("tags/{$id}");
-
-            return $this->handleResponse($response, 'Failed to get tag', ['id' => $id]);
+            return $this->client()->get("tags/{$id}")->json();
         });
     }
 
-    public function getCustomFields(): ?array
+    public function getCustomFields(): array
     {
         return Blink::once('activecampaign::custom-fields', function () {
-            $response = $this->client()->get('fields');
-
-            return $this->handleResponse($response, 'Failed to get custom fields');
+            return $this->client()->get('fields')->json();
         });
     }
 
@@ -114,17 +95,7 @@ class ActiveCampaignConnector
             'Api-Token' => $this->key,
         ])
             ->acceptJson()
+            ->throw()
             ->baseUrl("{$this->baseUrl}/api/3/");
-    }
-
-    private function handleResponse(Response $response, string $errorMessage, array $context = []): ?array
-    {
-        if (! $response->successful()) {
-            Log::error($errorMessage, array_merge([$response->json()], $context));
-
-            return null;
-        }
-
-        return $response->json();
     }
 }
