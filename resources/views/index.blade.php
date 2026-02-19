@@ -8,8 +8,9 @@
 
         <activecampaign-listing
             create-form-url="{{ cp_route('forms.create') }}"
+            configure-url="{{ $configureUrl }}"
             :initial-form-configs="{{ json_encode($formConfigs) }}"
-            :initial-localizations="{{ empty($localizations) ? '{}' : json_encode($localizations) }}"
+            :initial-localizations="{{ empty($localizations) ? '[]' : json_encode($localizations) }}"
             initial-site="{{ empty($locale) ? '' : $locale }}"
         ></activecampaign-listing>
 

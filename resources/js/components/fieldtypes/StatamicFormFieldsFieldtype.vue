@@ -28,7 +28,7 @@ export default {
 
     computed: {
         form() {
-            return StatamicConfig.urlPath.split('/')[1] ?? '';
+            return this.meta.form || '';
         },
     },
 
@@ -38,6 +38,8 @@ export default {
 
     methods: {
         refreshFields() {
+            if (!this.form) return;
+
             this.$axios
                 .get(cp_url(`/activecampaign/form-fields/${this.form}`))
                 .then(response => {

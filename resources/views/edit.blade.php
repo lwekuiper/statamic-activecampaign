@@ -17,8 +17,12 @@
         :blueprint="{{ json_encode($blueprint) }}"
         :initial-meta='{{ empty($meta) ? '{}' : json_encode($meta) }}'
         :initial-values='{{ empty($values) ? '{}' : json_encode($values) }}'
-        :initial-localizations="{{ empty($localizations) ? '{}' : json_encode($localizations) }}"
+        :initial-localizations="{{ empty($localizations) ? '[]' : json_encode($localizations) }}"
         initial-site="{{ empty($locale) ? '' : $locale }}"
+        :initial-has-origin="{{ json_encode($hasOrigin ?? false) }}"
+        :initial-origin-values='{{ json_encode($originValues ?? null) }}'
+        :initial-origin-meta='{{ json_encode($originMeta ?? null) }}'
+        :initial-localized-fields="{{ json_encode($localizedFields ?? []) }}"
     ></activecampaign-publish-form>
 
 @stop

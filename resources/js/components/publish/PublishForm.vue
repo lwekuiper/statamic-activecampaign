@@ -30,6 +30,8 @@
 
                 <button
                     class="btn-primary min-w-100"
+                    :class="{ 'opacity-25': !canSave }"
+                    :disabled="!canSave"
                     @click.prevent="save"
                     v-text="__('Save')" />
             </div>
@@ -41,12 +43,17 @@
             :blueprint="blueprint"
             :meta="meta"
             :errors="errors"
+            :localized-fields="localizedFields"
+            :is-root="!hasOrigin"
             v-model="values"
-            v-slot="{ setFieldValue, setFieldMeta }"
+            v-slot="{ setFieldMeta }"
         >
             <publish-tabs
+                :syncable="hasOrigin"
                 @updated="setFieldValue"
-                @meta-updated="setFieldMeta" />
+                @meta-updated="setFieldMeta"
+                @synced="syncField"
+                @desynced="desyncField" />
         </publish-container>
 
     </div>
@@ -69,6 +76,10 @@ export default {
         initialValues: Object,
         initialLocalizations: Array,
         initialSite: String,
+        initialHasOrigin: { type: Boolean, default: false },
+        initialOriginValues: { type: Object, default: null },
+        initialOriginMeta: { type: Object, default: null },
+        initialLocalizedFields: { type: Array, default: () => [] },
     },
 
     data() {
@@ -81,6 +92,11 @@ export default {
             values: _.clone(this.initialValues),
             localizations: _.clone(this.initialLocalizations),
             site: this.initialSite,
+            hasOrigin: this.initialHasOrigin,
+            originValues: this.initialOriginValues || {},
+            originMeta: this.initialOriginMeta || {},
+            localizedFields: this.initialLocalizedFields,
+            saving: false,
             error: null,
             errors: {},
         }
@@ -89,6 +105,14 @@ export default {
     computed: {
         isDirty() {
             return this.$dirty.has('base');
+        },
+
+        somethingIsLoading() {
+            return !this.$progress.isComplete();
+        },
+
+        canSave() {
+            return this.isDirty && !this.somethingIsLoading;
         },
     },
 
@@ -100,12 +124,16 @@ export default {
         },
 
         save() {
-            if (!this.action) return;
+            if (!this.canSave) return;
 
             this.saving = true;
             this.clearErrors();
 
-            this.$axios.patch(this.action, this.values).then(response => {
+            const payload = this.hasOrigin
+                ? { ...this.values, _localized: this.localizedFields }
+                : this.values;
+
+            this.$axios.patch(this.action, payload).then(response => {
                 this.saving = false;
                 this.$toast.success(__('Saved'));
                 this.$refs.container.saved();
@@ -148,15 +176,48 @@ export default {
                 this.values = data.values;
                 this.meta = data.meta;
                 this.localizations = data.localizations;
+                this.hasOrigin = data.hasOrigin;
+                this.originValues = data.originValues || {};
+                this.originMeta = data.originMeta || {};
+                this.localizedFields = data.localizedFields || [];
                 this.site = localization.handle;
                 this.localizing = false;
                 this.$nextTick(() => this.$refs.container.clearDirtyState());
             })
         },
 
+        setFieldValue(handle, value) {
+            if (this.hasOrigin) this.desyncField(handle);
+
+            this.$refs.container.setFieldValue(handle, value);
+        },
+
+        syncField(handle) {
+            if (! confirm(__('Are you sure? This field\'s value will be replaced by the value in the original entry.')))
+                return;
+
+            this.localizedFields = this.localizedFields.filter(field => field !== handle);
+            this.$refs.container.setFieldValue(handle, this.originValues[handle]);
+
+            this.meta[handle] = this.originMeta[handle];
+        },
+
+        desyncField(handle) {
+            if (!this.localizedFields.includes(handle))
+                this.localizedFields.push(handle);
+
+            this.$refs.container.dirty();
+        },
+
     },
 
-    created() {
+    watch: {
+        saving(saving) {
+            this.$progress.loading('base-publish-form', saving);
+        },
+    },
+
+    mounted() {
         this.$keys.bindGlobal(['mod+s'], e => {
             e.preventDefault();
             this.save();
