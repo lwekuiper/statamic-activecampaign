@@ -16,7 +16,6 @@
     </testsuite>
   </testsuites>
   <php>
-    <ini name="zend.assertions" value="0"/>
     <env name="APP_ENV" value="testing"/>
     <env name="APP_KEY" value="base64:ybcI9MKuhLnESRSuWDfnJQuohOXMBaynfbTC5Y5i1FE="/>
     <env name="BCRYPT_ROUNDS" value="4"/>
