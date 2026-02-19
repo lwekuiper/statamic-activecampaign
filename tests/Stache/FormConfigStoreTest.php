@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\Path;
 use Statamic\Facades\Stache;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;
+use Symfony\Component\Finder\SplFileInfo;
 
 class FormConfigStoreTest extends TestCase
 {
@@ -89,5 +90,110 @@ class FormConfigStoreTest extends TestCase
 
         $this->assertStringEqualsFile(Path::tidy($this->store->directory().'/en/test_form.yaml'), $enFormConfig->fileContents());
         $this->assertStringEqualsFile(Path::tidy($this->store->directory().'/nl/test_form.yaml'), $nlFormConfig->fileContents());
+    }
+
+    #[Test]
+    public function it_excludes_config_yaml_from_item_filter()
+    {
+        $directory = Path::tidy($this->store->directory());
+
+        $configFile = new SplFileInfo(
+            $directory.'/config.yaml',
+            '',
+            'config.yaml'
+        );
+        $this->assertFalse($this->store->getItemFilter($configFile));
+
+        $nestedConfigFile = new SplFileInfo(
+            $directory.'/en/config.yaml',
+            'en',
+            'en/config.yaml'
+        );
+        $this->assertFalse($this->store->getItemFilter($nestedConfigFile));
+    }
+
+    #[Test]
+    public function it_includes_yaml_form_config_files_in_item_filter()
+    {
+        $directory = Path::tidy($this->store->directory());
+
+        $formFile = new SplFileInfo(
+            $directory.'/contact_us.yaml',
+            '',
+            'contact_us.yaml'
+        );
+        $this->assertTrue($this->store->getItemFilter($formFile));
+
+        $nestedFormFile = new SplFileInfo(
+            $directory.'/en/contact_us.yaml',
+            'en',
+            'en/contact_us.yaml'
+        );
+        $this->assertTrue($this->store->getItemFilter($nestedFormFile));
+    }
+
+    #[Test]
+    public function it_excludes_non_yaml_files_from_item_filter()
+    {
+        $directory = Path::tidy($this->store->directory());
+
+        $nonYamlFile = new SplFileInfo(
+            $directory.'/contact_us.txt',
+            '',
+            'contact_us.txt'
+        );
+        $this->assertFalse($this->store->getItemFilter($nonYamlFile));
+    }
+
+    #[Test]
+    public function it_migrates_legacy_list_id_to_list_ids()
+    {
+        $contents = "email_field: email\nlist_id: 5";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/legacy_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals([5], $item->listIds());
+    }
+
+    #[Test]
+    public function it_migrates_legacy_tag_id_to_tag_ids()
+    {
+        $contents = "email_field: email\ntag_id: 3";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/legacy_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals([3], $item->tagIds());
+    }
+
+    #[Test]
+    public function it_does_not_overwrite_list_ids_with_legacy_list_id()
+    {
+        $contents = "email_field: email\nlist_ids:\n  - 10\nlist_id: 5";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/legacy_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals([10], $item->listIds());
+    }
+
+    #[Test]
+    public function it_does_not_overwrite_tag_ids_with_legacy_tag_id()
+    {
+        $contents = "email_field: email\ntag_ids:\n  - 20\ntag_id: 3";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/legacy_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals([20], $item->tagIds());
     }
 }

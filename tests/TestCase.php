@@ -1,6 +1,6 @@
 <?php
 
-namespace Lwekuiper\StatamicActiveCampaign\Tests;
+namespace Lwekuiper\StatamicActivecampaign\Tests;
 
 use Statamic\Facades\Site;
 use Statamic\Facades\User;

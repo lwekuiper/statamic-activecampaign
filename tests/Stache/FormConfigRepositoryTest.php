@@ -2,9 +2,11 @@
 
 namespace Lwekuiper\StatamicActivecampaign\Tests\Stache;
 
+use Lwekuiper\StatamicActivecampaign\Data\AddonConfig;
 use Lwekuiper\StatamicActivecampaign\Data\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Data\FormConfigCollection;
 use Lwekuiper\StatamicActivecampaign\Exceptions\FormConfigNotFoundException;
+use Lwekuiper\StatamicActivecampaign\Facades\AddonConfig as AddonConfigFacade;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig as FormConfigFacade;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigRepository;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigStore;
@@ -289,5 +291,179 @@ class FormConfigRepositoryTest extends TestCase
         $this->expectExceptionMessage('Form Config [does-not-exist::default] not found');
 
         $this->repo->findOrFail('does-not-exist', 'default');
+    }
+
+    #[Test]
+    public function find_resolved_returns_config_directly_when_it_exists()
+    {
+        $this->setUpMultiSite();
+
+        // Both 'en' and 'nl' have configs in fixtures, so direct lookup should work
+        $config = $this->repo->findResolved('contact_us', 'en');
+
+        $this->assertInstanceOf(FormConfig::class, $config);
+        $this->assertEquals('contact_us::en', $config->id());
+    }
+
+    #[Test]
+    public function find_resolved_follows_origin_chain_when_config_is_missing()
+    {
+        $this->setSites([
+            'en' => ['url' => '/'],
+            'nl' => ['url' => '/nl/'],
+            'be' => ['url' => '/be/'],
+        ]);
+
+        // Configure AddonConfig: en is root, nl inherits from en, be inherits from nl
+        $configPath = app(AddonConfig::class)->path();
+        $directory = dirname($configPath);
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        AddonConfigFacade::save(collect(['en' => null, 'nl' => 'en', 'be' => 'nl']));
+        app(AddonConfig::class)->fresh();
+
+        $stache = (new Stache)->sites(['en', 'nl', 'be']);
+        $this->app->instance(Stache::class, $stache);
+        $this->directory = __DIR__.'/__fixtures__/resources/activecampaign-multisite';
+        $stache->registerStore((new FormConfigStore($stache, app('files')))->directory($this->directory));
+
+        $this->repo = new FormConfigRepository($stache);
+
+        // 'en' and 'nl' have fixture configs; 'be' does not.
+        // findResolved('contact_us', 'be') should follow: be -> nl (found!)
+        $config = $this->repo->findResolved('contact_us', 'be');
+
+        $this->assertInstanceOf(FormConfig::class, $config);
+        $this->assertEquals('contact_us::nl', $config->id());
+
+        @unlink($configPath);
+    }
+
+    #[Test]
+    public function find_resolved_returns_null_when_no_config_exists_in_chain()
+    {
+        $this->setSites([
+            'en' => ['url' => '/'],
+            'nl' => ['url' => '/nl/'],
+        ]);
+
+        // Configure AddonConfig: en is root, nl inherits from en
+        $configPath = app(AddonConfig::class)->path();
+        $directory = dirname($configPath);
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        AddonConfigFacade::save(collect(['en' => null, 'nl' => 'en']));
+        app(AddonConfig::class)->fresh();
+
+        $stache = (new Stache)->sites(['en', 'nl']);
+        $this->app->instance(Stache::class, $stache);
+        $this->directory = __DIR__.'/__fixtures__/resources/activecampaign-multisite';
+        $stache->registerStore((new FormConfigStore($stache, app('files')))->directory($this->directory));
+
+        $this->repo = new FormConfigRepository($stache);
+
+        // 'nonexistent' form doesn't exist on any site
+        $config = $this->repo->findResolved('nonexistent', 'nl');
+
+        $this->assertNull($config);
+
+        @unlink($configPath);
+    }
+
+    #[Test]
+    public function ensure_localizations_exist_creates_configs_for_enabled_sites()
+    {
+        $this->setSites([
+            'en' => ['url' => '/'],
+            'nl' => ['url' => '/nl/'],
+        ]);
+
+        $configPath = app(AddonConfig::class)->path();
+        $directory = dirname($configPath);
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        AddonConfigFacade::save(collect(['en' => null, 'nl' => 'en']));
+        app(AddonConfig::class)->fresh();
+
+        $stache = (new Stache)->sites(['en', 'nl']);
+        $this->app->instance(Stache::class, $stache);
+        // Use a temp directory so we don't pollute fixtures
+        $this->directory = $this->app->basePath('resources/activecampaign');
+        if (! is_dir($this->directory)) {
+            mkdir($this->directory, 0755, true);
+        }
+        $stache->registerStore((new FormConfigStore($stache, app('files')))->directory($this->directory));
+
+        $this->repo = new FormConfigRepository($stache);
+
+        $this->assertNull($this->repo->find('new_form', 'en'));
+        $this->assertNull($this->repo->find('new_form', 'nl'));
+
+        $this->repo->ensureLocalizationsExist('new_form');
+
+        $this->assertNotNull($this->repo->find('new_form', 'en'));
+        $this->assertNotNull($this->repo->find('new_form', 'nl'));
+
+        // Clean up
+        @unlink($this->directory.'/en/new_form.yaml');
+        @unlink($this->directory.'/nl/new_form.yaml');
+        @rmdir($this->directory.'/en');
+        @rmdir($this->directory.'/nl');
+        @unlink($configPath);
+    }
+
+    #[Test]
+    public function ensure_localizations_exist_does_not_duplicate_existing_configs()
+    {
+        $this->setSites([
+            'en' => ['url' => '/'],
+            'nl' => ['url' => '/nl/'],
+        ]);
+
+        $configPath = app(AddonConfig::class)->path();
+        $directory = dirname($configPath);
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        AddonConfigFacade::save(collect(['en' => null, 'nl' => 'en']));
+        app(AddonConfig::class)->fresh();
+
+        $stache = (new Stache)->sites(['en', 'nl']);
+        $this->app->instance(Stache::class, $stache);
+        $this->directory = $this->app->basePath('resources/activecampaign');
+        if (! is_dir($this->directory)) {
+            mkdir($this->directory, 0755, true);
+        }
+        $stache->registerStore((new FormConfigStore($stache, app('files')))->directory($this->directory));
+
+        $this->repo = new FormConfigRepository($stache);
+
+        // Create an existing config for 'en' with data
+        $existing = $this->repo->make()->form('new_form')->locale('en');
+        $existing->emailField('email')->listIds([1]);
+        $this->repo->save($existing);
+
+        $this->assertNotNull($this->repo->find('new_form', 'en'));
+        $this->assertNull($this->repo->find('new_form', 'nl'));
+
+        $this->repo->ensureLocalizationsExist('new_form');
+
+        // 'en' config should remain unchanged
+        $enConfig = $this->repo->find('new_form', 'en');
+        $this->assertEquals('email', $enConfig->emailField());
+        $this->assertEquals([1], $enConfig->listIds());
+
+        // 'nl' config should be created
+        $this->assertNotNull($this->repo->find('new_form', 'nl'));
+
+        // Clean up
+        @unlink($this->directory.'/en/new_form.yaml');
+        @unlink($this->directory.'/nl/new_form.yaml');
+        @rmdir($this->directory.'/en');
+        @rmdir($this->directory.'/nl');
+        @unlink($configPath);
     }
 }

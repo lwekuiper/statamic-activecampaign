@@ -62,13 +62,55 @@ class ViewFormConfigListingTest extends TestCase
             ->assertViewHas('formConfigs', function ($formConfigs) {
                 return Arr::get($formConfigs, '0.title') === 'Form One'
                     && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit')
-                    && Arr::get($formConfigs, '0.list_ids') === 1
-                    && Arr::get($formConfigs, '0.tag_ids') === 1
+                    && Arr::get($formConfigs, '0.lists') === 1
+                    && Arr::get($formConfigs, '0.tags') === 1
+                    && Arr::get($formConfigs, '0.status') === 'published'
                     && Arr::get($formConfigs, '1.title') === 'Form Two'
                     && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit')
-                    && Arr::get($formConfigs, '1.list_ids') === null
-                    && Arr::get($formConfigs, '1.tag_ids') === null;
+                    && Arr::get($formConfigs, '1.lists') === 0
+                    && Arr::get($formConfigs, '1.tags') === 0
+                    && Arr::get($formConfigs, '1.status') === 'draft';
             });
+    }
+
+    #[Test]
+    public function it_does_not_include_configure_url_on_single_site()
+    {
+        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $user = User::make()->assignRole('test')->save();
+
+        tap(Form::make('test'))->save();
+
+        $this->actingAs($user)
+            ->get(cp_route('activecampaign.index'))
+            ->assertOk()
+            ->assertViewHas('configureUrl', null);
+    }
+
+    #[Test]
+    public function it_includes_configure_url_on_multi_site_pro()
+    {
+        $this->setProEdition();
+
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en', 'name' => 'English'],
+            'nl' => ['url' => 'http://localhost/nl/', 'locale' => 'nl', 'name' => 'Dutch'],
+        ]);
+
+        $this->setTestRoles(['test' => [
+            'access cp',
+            'access en site',
+            'access nl site',
+            'configure forms',
+        ]]);
+        $user = User::make()->assignRole('test')->save();
+
+        tap(Form::make('test'))->save();
+
+        $this->actingAs($user)
+            ->get(cp_route('activecampaign.index'))
+            ->assertOk()
+            ->assertViewHas('configureUrl', cp_route('activecampaign.edit'));
     }
 
     #[Test]
@@ -105,12 +147,14 @@ class ViewFormConfigListingTest extends TestCase
             ->assertViewHas('formConfigs', function ($formConfigs) {
                 return Arr::get($formConfigs, '0.title') === 'Form One'
                     && Arr::get($formConfigs, '0.edit_url') === url('/cp/activecampaign/form_one/edit?site=nl')
-                    && Arr::get($formConfigs, '0.list_ids') === 1
-                    && Arr::get($formConfigs, '0.tag_ids') === 1
+                    && Arr::get($formConfigs, '0.lists') === 1
+                    && Arr::get($formConfigs, '0.tags') === 1
+                    && Arr::get($formConfigs, '0.status') === 'published'
                     && Arr::get($formConfigs, '1.title') === 'Form Two'
                     && Arr::get($formConfigs, '1.edit_url') === url('/cp/activecampaign/form_two/edit?site=nl')
-                    && Arr::get($formConfigs, '1.list_ids') === null
-                    && Arr::get($formConfigs, '1.tag_ids') === null;
+                    && Arr::get($formConfigs, '1.lists') === 0
+                    && Arr::get($formConfigs, '1.tags') === 0
+                    && Arr::get($formConfigs, '1.status') === 'draft';
             });
     }
 }
