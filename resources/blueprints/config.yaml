@@ -3,6 +3,7 @@ tabs:
     display: 'General'
     sections:
       -
+        display: 'Subscriber'
         fields:
           -
             handle: email_field
@@ -21,15 +22,65 @@ tabs:
               type: statamic_form_fields
               localizable: true
               width: 50
+      -
+        display: 'Lists'
+        fields:
+          -
+            handle: list_mode
+            field:
+              display: 'List Mode'
+              instructions: 'How subscribers are added to lists.'
+              type: button_group
+              default: fixed
+              validate: 'required'
+              localizable: true
+              options:
+                fixed: 'Fixed'
+                dynamic: 'Dynamic'
+                both: 'Both'
           -
             handle: list_ids
             field:
-              display: 'Lists'
-              instructions: 'The ActiveCampaign lists you want to add the subscriber to.'
+              display: 'Fixed Lists'
+              instructions: 'The ActiveCampaign lists all subscribers are added to.'
               type: activecampaign_list
-              validate: 'required'
+              validate: 'required_if:list_mode,fixed,both'
               localizable: true
-              width: 50
+              if:
+                list_mode: 'contains_any fixed, both'
+          -
+            handle: list_fields
+            field:
+              display: 'Dynamic Lists'
+              instructions: 'Map form fields to ActiveCampaign lists. When the field value is truthy (or matches the subscription value), the subscriber is added to that list.'
+              type: grid
+              mode: table
+              listable: hidden
+              fullscreen: false
+              localizable: true
+              validate: 'required_if:list_mode,dynamic,both'
+              add_row: 'Add List Field'
+              if:
+                list_mode: 'contains_any dynamic, both'
+              fields:
+                -
+                  handle: subscription_field
+                  field:
+                    display: 'Form Field'
+                    type: statamic_form_fields
+                    validate: required
+                -
+                  handle: activecampaign_list_id
+                  field:
+                    display: 'ActiveCampaign List'
+                    type: activecampaign_list_select
+                    validate: required
+                -
+                  handle: subscription_value
+                  field:
+                    display: 'Subscription Value'
+                    instructions: 'For multi-option fields, the specific value that triggers subscription. Leave empty for boolean fields.'
+                    type: text
           -
             handle: tag_ids
             field:
@@ -37,7 +88,9 @@ tabs:
               instructions: 'The ActiveCampaign tags you want to add to the subscriber.'
               type: activecampaign_tag
               localizable: true
-              width: 50
+      -
+        display: 'Field Mapping'
+        fields:
           -
             handle: merge_fields
             field:

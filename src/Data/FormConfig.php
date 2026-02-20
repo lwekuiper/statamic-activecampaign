@@ -78,6 +78,15 @@ class FormConfig implements Localization
         return $this->set('consent_field', $value);
     }
 
+    public function listMode($value = null)
+    {
+        if (func_num_args() === 0) {
+            return $this->get('list_mode', 'fixed');
+        }
+
+        return $this->set('list_mode', $value);
+    }
+
     public function listIds($value = null)
     {
         if (func_num_args() === 0) {
@@ -85,6 +94,15 @@ class FormConfig implements Localization
         }
 
         return $this->set('list_ids', $value);
+    }
+
+    public function listFields($value = null)
+    {
+        if (func_num_args() === 0) {
+            return $this->get('list_fields', []);
+        }
+
+        return $this->set('list_fields', $value);
     }
 
     public function tagIds($value = null)
