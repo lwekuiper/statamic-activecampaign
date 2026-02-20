@@ -6,6 +6,7 @@ namespace Lwekuiper\StatamicActivecampaign;
 
 use Lwekuiper\StatamicActivecampaign\Connectors\ActiveCampaignConnector;
 use Lwekuiper\StatamicActivecampaign\Data\AddonConfig;
+use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActiveCampaignListSelect;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActiveCampaignSites;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignList;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignMergeFields;
@@ -28,6 +29,7 @@ use Statamic\Stache\Stache;
 class ServiceProvider extends AddonServiceProvider
 {
     protected $fieldtypes = [
+        ActiveCampaignListSelect::class,
         ActiveCampaignSites::class,
         ActivecampaignList::class,
         ActivecampaignMergeFields::class,

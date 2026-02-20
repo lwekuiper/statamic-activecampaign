@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Lwekuiper\StatamicActivecampaign\Http\Controllers\AddonConfigController;
 use Lwekuiper\StatamicActivecampaign\Http\Controllers\FormConfigController;
 use Lwekuiper\StatamicActivecampaign\Http\Controllers\GetFormFieldsController;
+use Lwekuiper\StatamicActivecampaign\Http\Controllers\GetListsController;
 use Lwekuiper\StatamicActivecampaign\Http\Controllers\GetMergeFieldsController;
 
 Route::name('activecampaign.')->prefix('activecampaign')->group(function () {
@@ -19,5 +20,6 @@ Route::name('activecampaign.')->prefix('activecampaign')->group(function () {
     });
 
     Route::get('form-fields/{form}', [GetFormFieldsController::class, '__invoke'])->name('form-fields');
+    Route::get('lists', [GetListsController::class, '__invoke'])->name('lists');
     Route::get('merge-fields', [GetMergeFieldsController::class, '__invoke'])->name('merge-fields');
 });
