@@ -79,8 +79,8 @@ tabs:
                   handle: subscription_value
                   field:
                     display: 'Subscription Value'
-                    instructions: 'For multi-option fields, the specific value that triggers subscription. Leave empty for boolean fields.'
-                    type: text
+                    instructions: 'The specific option value that triggers subscription to this list.'
+                    type: subscription_value
           -
             handle: tag_ids
             field:
