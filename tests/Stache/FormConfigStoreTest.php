@@ -196,4 +196,34 @@ class FormConfigStoreTest extends TestCase
         $this->assertInstanceOf(FormConfig::class, $item);
         $this->assertEquals([20], $item->tagIds());
     }
+
+    #[Test]
+    public function it_defaults_list_mode_to_fixed_for_existing_configs()
+    {
+        $contents = "email_field: email\nlist_ids:\n  - 1";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/test_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals('fixed', $item->listMode());
+        $this->assertEquals([], $item->listFields());
+    }
+
+    #[Test]
+    public function it_reads_list_mode_and_list_fields_from_file()
+    {
+        $contents = "email_field: email\nlist_mode: dynamic\nlist_fields:\n  -\n    subscription_field: subscribe_weekly\n    activecampaign_list_id: '10'\n    subscription_value: ''";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/dynamic_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals('dynamic', $item->listMode());
+        $this->assertCount(1, $item->listFields());
+        $this->assertEquals('subscribe_weekly', $item->listFields()[0]['subscription_field']);
+        $this->assertEquals('10', $item->listFields()[0]['activecampaign_list_id']);
+    }
 }

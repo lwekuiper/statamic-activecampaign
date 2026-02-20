@@ -114,6 +114,30 @@ class ViewFormConfigListingTest extends TestCase
     }
 
     #[Test]
+    public function it_counts_both_fixed_and_dynamic_lists()
+    {
+        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $user = User::make()->assignRole('test')->save();
+
+        $form = tap(Form::make('form_one')->title('Form One'))->save();
+
+        $formConfig = tap(FormConfig::make()->form($form)->locale('default'));
+        $formConfig->emailField('email')->listMode('both')->listIds([1])->tagIds([1]);
+        $formConfig->listFields([
+            ['subscription_field' => 'subscribe_weekly', 'activecampaign_list_id' => '10', 'subscription_value' => ''],
+            ['subscription_field' => 'subscribe_monthly', 'activecampaign_list_id' => '20', 'subscription_value' => ''],
+        ]);
+        $formConfig->save();
+
+        $this->actingAs($user)
+            ->get(cp_route('activecampaign.index'))
+            ->assertOk()
+            ->assertViewHas('formConfigs', function ($formConfigs) {
+                return Arr::get($formConfigs, '0.lists') === 3;
+            });
+    }
+
+    #[Test]
     public function it_lists_form_configs_with_multi_site()
     {
         $this->setProEdition();

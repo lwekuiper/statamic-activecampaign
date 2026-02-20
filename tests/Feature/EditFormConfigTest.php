@@ -40,8 +40,10 @@ class EditFormConfigTest extends TestCase
             ->assertOk()
             ->assertViewHas('values', collect([
                 'email_field' => 'email',
-                'list_ids' => [1],
                 'consent_field' => 'consent',
+                'list_mode' => 'fixed',
+                'list_ids' => [1],
+                'list_fields' => [],
                 'tag_ids' => [1],
                 'merge_fields' => [],
             ]));

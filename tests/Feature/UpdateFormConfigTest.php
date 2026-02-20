@@ -32,6 +32,7 @@ class UpdateFormConfigTest extends TestCase
             ->actingAs($user)
             ->patchJson($formConfig->updateUrl(), [
                 'email_field' => 'email',
+                'list_mode' => 'fixed',
                 'list_ids' => [2],
                 'consent_field' => 'consent',
                 'tag_ids' => [2]
