@@ -10,6 +10,7 @@ tabs:
               display: 'Email Field'
               instructions: 'The form field that contains the email of the subscriber.'
               type: statamic_form_fields
+              field_filter: email
               validate: 'required'
               localizable: true
               width: 50
@@ -19,6 +20,7 @@ tabs:
               display: 'Consent Field'
               instructions: 'The form field that contains the consent of the subscriber.'
               type: statamic_form_fields
+              field_filter: toggle
               localizable: true
               width: 50
           -

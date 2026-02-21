@@ -28,4 +28,17 @@ return [
 
     'api_key' => env('ACTIVECAMPAIGN_API_KEY'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Filter Form Fields
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, the email field selector will only show text fields with
+    | input type "email", and the consent field selector will only show
+    | toggle fields. Set to false to show all form fields.
+    |
+    */
+
+    'filter_form_fields' => true,
+
 ];

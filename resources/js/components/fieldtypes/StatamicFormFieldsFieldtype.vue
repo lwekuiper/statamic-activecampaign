@@ -30,6 +30,10 @@ export default {
         form() {
             return this.meta.form || '';
         },
+
+        fieldFilter() {
+            return this.meta.fieldFilter || null;
+        },
     },
 
     mounted() {
@@ -40,8 +44,13 @@ export default {
         refreshFields() {
             if (!this.form) return;
 
+            const params = {};
+            if (this.fieldFilter) {
+                params.filter = this.fieldFilter;
+            }
+
             this.$axios
-                .get(cp_url(`/activecampaign/form-fields/${this.form}`))
+                .get(cp_url(`/activecampaign/form-fields/${this.form}`), { params })
                 .then(response => {
                     this.fields = response.data;
                 })
