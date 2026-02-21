@@ -17,7 +17,7 @@ class GetFormFieldsController extends Controller
 
         if ($filter = $request->query('filter')) {
             $fields = $fields->filter(fn (Field $field) => match ($filter) {
-                'email' => $field->type() === 'text' && $field->config()['input_type'] === 'email',
+                'email' => $field->type() === 'text' && ($field->config()['input_type'] ?? null) === 'email',
                 'toggle' => $field->type() === 'toggle',
                 default => true,
             });
