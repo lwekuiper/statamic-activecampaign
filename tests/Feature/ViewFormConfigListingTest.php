@@ -124,8 +124,22 @@ class ViewFormConfigListingTest extends TestCase
         $formConfig = tap(FormConfig::make()->form($form)->locale('default'));
         $formConfig->emailField('email')->listMode('both')->listIds([1])->tagIds([1]);
         $formConfig->listFields([
-            ['subscription_field' => 'subscribe_weekly', 'activecampaign_list_id' => '10', 'subscription_value' => ''],
-            ['subscription_field' => 'subscribe_monthly', 'activecampaign_list_id' => '20', 'subscription_value' => ''],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'subscribe_weekly',
+                'list_mappings' => [
+                    ['activecampaign_list_id' => '10'],
+                ],
+            ],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'subscribe_monthly',
+                'list_mappings' => [
+                    ['activecampaign_list_id' => '20'],
+                ],
+            ],
         ]);
         $formConfig->save();
 

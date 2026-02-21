@@ -52,35 +52,31 @@ tabs:
             handle: list_fields
             field:
               display: 'Dynamic Lists'
-              instructions: 'Map form fields to ActiveCampaign lists. When the field value is truthy (or matches the subscription value), the subscriber is added to that list.'
-              type: grid
-              mode: table
-              listable: hidden
-              fullscreen: false
+              instructions: 'Map form fields to ActiveCampaign lists. For multi-option fields (checkboxes, radio, select), map each value to a list. For toggle fields, select a single list.'
+              type: replicator
               localizable: true
               validate: 'required_if:list_mode,dynamic,both'
-              add_row: 'Add List Field'
+              button_label: 'Add List Field'
               if:
                 list_mode: 'contains_any dynamic, both'
-              fields:
-                -
-                  handle: subscription_field
-                  field:
-                    display: 'Form Field'
-                    type: statamic_form_fields
-                    validate: required
-                -
-                  handle: activecampaign_list_id
-                  field:
-                    display: 'ActiveCampaign List'
-                    type: activecampaign_list_select
-                    validate: required
-                -
-                  handle: subscription_value
-                  field:
-                    display: 'Subscription Value'
-                    instructions: 'The specific option value that triggers subscription to this list.'
-                    type: subscription_value
+              sets:
+                main:
+                  display: 'List Mapping'
+                  sets:
+                    list_mapping:
+                      display: 'List Mapping'
+                      fields:
+                        -
+                          handle: subscription_field
+                          field:
+                            display: 'Form Field'
+                            type: statamic_form_fields
+                            validate: required
+                        -
+                          handle: list_mappings
+                          field:
+                            display: 'List Mappings'
+                            type: list_field_mappings
           -
             handle: tag_ids
             field:

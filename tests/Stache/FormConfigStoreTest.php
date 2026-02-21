@@ -214,7 +214,7 @@ class FormConfigStoreTest extends TestCase
     #[Test]
     public function it_reads_list_mode_and_list_fields_from_file()
     {
-        $contents = "email_field: email\nlist_mode: dynamic\nlist_fields:\n  -\n    subscription_field: subscribe_weekly\n    activecampaign_list_id: '10'\n    subscription_value: ''";
+        $contents = "email_field: email\nlist_mode: dynamic\nlist_fields:\n  -\n    type: list_mapping\n    enabled: true\n    subscription_field: subscribe_weekly\n    list_mappings:\n      -\n        activecampaign_list_id: '10'";
         $item = $this->store->makeItemFromFile(
             Path::tidy($this->store->directory().'/dynamic_form.yaml'),
             $contents
@@ -223,7 +223,54 @@ class FormConfigStoreTest extends TestCase
         $this->assertInstanceOf(FormConfig::class, $item);
         $this->assertEquals('dynamic', $item->listMode());
         $this->assertCount(1, $item->listFields());
+        $this->assertEquals('list_mapping', $item->listFields()[0]['type']);
         $this->assertEquals('subscribe_weekly', $item->listFields()[0]['subscription_field']);
-        $this->assertEquals('10', $item->listFields()[0]['activecampaign_list_id']);
+        $this->assertCount(1, $item->listFields()[0]['list_mappings']);
+        $this->assertEquals('10', $item->listFields()[0]['list_mappings'][0]['activecampaign_list_id']);
+    }
+
+    #[Test]
+    public function it_migrates_flat_list_fields_to_replicator_format()
+    {
+        $contents = "email_field: email\nlist_mode: dynamic\nlist_fields:\n  -\n    subscription_field: interests\n    activecampaign_list_id: '10'\n    subscription_value: tech\n  -\n    subscription_field: interests\n    activecampaign_list_id: '20'\n    subscription_value: sports\n  -\n    subscription_field: subscribe_weekly\n    activecampaign_list_id: '30'\n    subscription_value: ''";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/migration_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertCount(2, $item->listFields());
+
+        // First set: interests field with two value mappings
+        $this->assertEquals('list_mapping', $item->listFields()[0]['type']);
+        $this->assertEquals('interests', $item->listFields()[0]['subscription_field']);
+        $this->assertCount(2, $item->listFields()[0]['list_mappings']);
+        $this->assertEquals('tech', $item->listFields()[0]['list_mappings'][0]['subscription_value']);
+        $this->assertEquals('10', $item->listFields()[0]['list_mappings'][0]['activecampaign_list_id']);
+        $this->assertEquals('sports', $item->listFields()[0]['list_mappings'][1]['subscription_value']);
+        $this->assertEquals('20', $item->listFields()[0]['list_mappings'][1]['activecampaign_list_id']);
+
+        // Second set: subscribe_weekly toggle field
+        $this->assertEquals('list_mapping', $item->listFields()[1]['type']);
+        $this->assertEquals('subscribe_weekly', $item->listFields()[1]['subscription_field']);
+        $this->assertCount(1, $item->listFields()[1]['list_mappings']);
+        $this->assertEquals('30', $item->listFields()[1]['list_mappings'][0]['activecampaign_list_id']);
+        $this->assertArrayNotHasKey('subscription_value', $item->listFields()[1]['list_mappings'][0]);
+    }
+
+    #[Test]
+    public function it_does_not_migrate_list_fields_already_in_replicator_format()
+    {
+        $contents = "email_field: email\nlist_mode: dynamic\nlist_fields:\n  -\n    type: list_mapping\n    enabled: true\n    subscription_field: interests\n    list_mappings:\n      -\n        subscription_value: tech\n        activecampaign_list_id: '10'";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/replicator_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertCount(1, $item->listFields());
+        $this->assertEquals('list_mapping', $item->listFields()[0]['type']);
+        $this->assertEquals('interests', $item->listFields()[0]['subscription_field']);
+        $this->assertCount(1, $item->listFields()[0]['list_mappings']);
     }
 }

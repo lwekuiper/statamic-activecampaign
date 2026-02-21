@@ -11,6 +11,7 @@ use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActiveCampaignSites;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignList;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignMergeFields;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignTag;
+use Lwekuiper\StatamicActivecampaign\Fieldtypes\ListFieldMappings;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\StatamicFormFields;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\SubscriptionValue;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
@@ -35,6 +36,7 @@ class ServiceProvider extends AddonServiceProvider
         ActivecampaignList::class,
         ActivecampaignMergeFields::class,
         ActivecampaignTag::class,
+        ListFieldMappings::class,
         StatamicFormFields::class,
         SubscriptionValue::class,
     ];

@@ -73,21 +73,26 @@ class AddFromSubmission
         $listFields = $this->config->value('list_fields') ?? [];
 
         return collect($listFields)
-            ->filter(function ($row) {
-                $fieldData = $this->data->get($row['subscription_field'] ?? '');
-                $subscriptionValue = $row['subscription_value'] ?? null;
+            ->filter(fn ($set) => ($set['enabled'] ?? true))
+            ->flatMap(function ($set) {
+                $fieldData = $this->data->get($set['subscription_field'] ?? '');
+                $mappings = $set['list_mappings'] ?? [];
 
-                if ($subscriptionValue !== null && $subscriptionValue !== '') {
-                    return in_array($subscriptionValue, Arr::wrap($fieldData));
-                }
+                return collect($mappings)->filter(function ($mapping) use ($fieldData) {
+                    $subscriptionValue = $mapping['subscription_value'] ?? null;
 
-                return filter_var(
-                    Arr::get(Arr::wrap($fieldData), 0, false),
-                    FILTER_VALIDATE_BOOLEAN
-                );
+                    if ($subscriptionValue !== null && $subscriptionValue !== '') {
+                        return in_array($subscriptionValue, Arr::wrap($fieldData));
+                    }
+
+                    return filter_var(
+                        Arr::get(Arr::wrap($fieldData), 0, false),
+                        FILTER_VALIDATE_BOOLEAN
+                    );
+                })->pluck('activecampaign_list_id');
             })
-            ->pluck('activecampaign_list_id')
             ->filter()
+            ->unique()
             ->values()
             ->all();
     }

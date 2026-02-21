@@ -245,8 +245,22 @@ class AddFromSubmissionTest extends TestCase
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listMode('dynamic');
         $formConfig->listFields([
-            ['subscription_field' => 'subscribe_weekly', 'activecampaign_list_id' => '10', 'subscription_value' => ''],
-            ['subscription_field' => 'subscribe_monthly', 'activecampaign_list_id' => '20', 'subscription_value' => ''],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'subscribe_weekly',
+                'list_mappings' => [
+                    ['activecampaign_list_id' => '10'],
+                ],
+            ],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'subscribe_monthly',
+                'list_mappings' => [
+                    ['activecampaign_list_id' => '20'],
+                ],
+            ],
         ]);
         $formConfig->save();
 
@@ -269,9 +283,16 @@ class AddFromSubmissionTest extends TestCase
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listMode('dynamic');
         $formConfig->listFields([
-            ['subscription_field' => 'interests', 'activecampaign_list_id' => '10', 'subscription_value' => 'tech_news'],
-            ['subscription_field' => 'interests', 'activecampaign_list_id' => '20', 'subscription_value' => 'cooking'],
-            ['subscription_field' => 'interests', 'activecampaign_list_id' => '30', 'subscription_value' => 'sports'],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'interests',
+                'list_mappings' => [
+                    ['subscription_value' => 'tech_news', 'activecampaign_list_id' => '10'],
+                    ['subscription_value' => 'cooking', 'activecampaign_list_id' => '20'],
+                    ['subscription_value' => 'sports', 'activecampaign_list_id' => '30'],
+                ],
+            ],
         ]);
         $formConfig->save();
 
@@ -294,8 +315,15 @@ class AddFromSubmissionTest extends TestCase
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listMode('dynamic');
         $formConfig->listFields([
-            ['subscription_field' => 'preference', 'activecampaign_list_id' => '10', 'subscription_value' => 'weekly'],
-            ['subscription_field' => 'preference', 'activecampaign_list_id' => '20', 'subscription_value' => 'monthly'],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'preference',
+                'list_mappings' => [
+                    ['subscription_value' => 'weekly', 'activecampaign_list_id' => '10'],
+                    ['subscription_value' => 'monthly', 'activecampaign_list_id' => '20'],
+                ],
+            ],
         ]);
         $formConfig->save();
 
@@ -318,7 +346,14 @@ class AddFromSubmissionTest extends TestCase
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listMode('both')->listIds(['5']);
         $formConfig->listFields([
-            ['subscription_field' => 'subscribe_extra', 'activecampaign_list_id' => '10', 'subscription_value' => ''],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'subscribe_extra',
+                'list_mappings' => [
+                    ['activecampaign_list_id' => '10'],
+                ],
+            ],
         ]);
         $formConfig->save();
 
@@ -341,7 +376,14 @@ class AddFromSubmissionTest extends TestCase
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listMode('fixed')->listIds(['5']);
         $formConfig->listFields([
-            ['subscription_field' => 'subscribe_extra', 'activecampaign_list_id' => '10', 'subscription_value' => ''],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'subscribe_extra',
+                'list_mappings' => [
+                    ['activecampaign_list_id' => '10'],
+                ],
+            ],
         ]);
         $formConfig->save();
 
@@ -366,7 +408,14 @@ class AddFromSubmissionTest extends TestCase
         $formConfig = FormConfig::make()->form($form)->locale('default');
         $formConfig->emailField('email')->listMode('dynamic');
         $formConfig->listFields([
-            ['subscription_field' => 'subscribe_weekly', 'activecampaign_list_id' => '10', 'subscription_value' => ''],
+            [
+                'type' => 'list_mapping',
+                'enabled' => true,
+                'subscription_field' => 'subscribe_weekly',
+                'list_mappings' => [
+                    ['activecampaign_list_id' => '10'],
+                ],
+            ],
         ]);
         $formConfig->save();
 

@@ -60,6 +60,11 @@ class FormConfigStore extends BasicStore
         }
         unset($data['tag_id']);
 
+        // Migrate flat list_fields grid to replicator format
+        if (isset($data['list_fields']) && is_array($data['list_fields'])) {
+            $data['list_fields'] = $this->migrateListFieldsToReplicator($data['list_fields']);
+        }
+
         $formConfig = FormConfig::make()
             ->initialPath($path)
             ->data($data);
@@ -79,5 +84,39 @@ class FormConfigStore extends BasicStore
     public function getItemKey($item)
     {
         return "{$item->handle()}::{$item->locale()}";
+    }
+
+    private function migrateListFieldsToReplicator(array $listFields): array
+    {
+        if (empty($listFields)) {
+            return [];
+        }
+
+        // Already in replicator format if first item has 'type' key
+        if (isset($listFields[0]['type'])) {
+            return $listFields;
+        }
+
+        // Group flat rows by subscription_field and convert to replicator sets
+        return collect($listFields)
+            ->groupBy('subscription_field')
+            ->map(function ($rows, $field) {
+                return [
+                    'type' => 'list_mapping',
+                    'enabled' => true,
+                    'subscription_field' => $field,
+                    'list_mappings' => $rows->map(function ($row) {
+                        $mapping = ['activecampaign_list_id' => $row['activecampaign_list_id']];
+
+                        if (! empty($row['subscription_value'])) {
+                            $mapping['subscription_value'] = $row['subscription_value'];
+                        }
+
+                        return $mapping;
+                    })->values()->all(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 }

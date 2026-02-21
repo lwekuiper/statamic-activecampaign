@@ -5,6 +5,7 @@ import MergeFieldsField from './components/fieldtypes/ActiveCampaignMergeFieldsF
 import FormFieldsField from './components/fieldtypes/StatamicFormFieldsFieldtype.vue';
 import SitesField from './components/fieldtypes/ActiveCampaignSitesFieldtype.vue';
 import SubscriptionValueField from './components/fieldtypes/SubscriptionValueFieldtype.vue';
+import ListFieldMappingsField from './components/fieldtypes/ListFieldMappingsFieldtype.vue';
 
 Statamic.booting(() => {
     Statamic.$components.register('activecampaign-listing', Listing);
@@ -14,4 +15,5 @@ Statamic.booting(() => {
     Statamic.$components.register('statamic_form_fields-fieldtype', FormFieldsField);
     Statamic.$components.register('activecampaign_sites-fieldtype', SitesField);
     Statamic.$components.register('subscription_value-fieldtype', SubscriptionValueField);
+    Statamic.$components.register('list_field_mappings-fieldtype', ListFieldMappingsField);
 });

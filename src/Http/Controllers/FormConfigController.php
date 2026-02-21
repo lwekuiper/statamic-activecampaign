@@ -35,7 +35,9 @@ class FormConfigController extends CpController
 
             $resolvedValues = $resolved?->values() ?? collect();
             $resolvedListIds = $resolvedValues->get('list_ids', []);
-            $resolvedListFields = $resolvedValues->get('list_fields', []);
+            $resolvedListFields = collect($resolvedValues->get('list_fields', []))
+                ->flatMap(fn ($set) => $set['list_mappings'] ?? [])
+                ->all();
             $resolvedTagIds = $resolvedValues->get('tag_ids', []);
 
             $hasLocalData = $localConfig !== null && ! $localConfig->data()->isEmpty();
