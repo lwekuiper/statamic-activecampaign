@@ -2,6 +2,12 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 2.4.0 (2026-02-26)
+
+### What's new
+- Conditional list subscriptions with three modes: Always, Conditional, and Both
+- Form field options fieldtype for mapping form field options to ActiveCampaign lists
+
 ## 2.3.0 (2026-02-19)
 
 ### What's new

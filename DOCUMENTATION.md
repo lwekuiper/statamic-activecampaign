@@ -181,6 +181,38 @@ Use the form in your Antlers templates as usual. No special markup is needed for
 {{ /form:newsletter_signup }}
 ```
 
+## Conditional List Subscriptions
+
+By default, all form submissions subscribe the contact to the configured lists. With conditional list subscriptions, you can let form fields determine which lists a contact is subscribed to.
+
+### List Modes
+
+The **List Mode** setting controls how subscribers are added to lists:
+
+- **Always**: All submissions are added to the selected lists. This is the default behavior.
+- **Conditional**: List subscriptions are determined by form field values. Each mapping links a form field (and optionally a specific option) to an ActiveCampaign list.
+- **Both**: Combines always and conditional — submissions are added to the fixed lists plus any lists matched by form field values.
+
+### Setting Up Conditional Lists
+
+1. Navigate to **Tools > ActiveCampaign** and edit the form configuration
+2. Set the **List Mode** to "Conditional" or "Both"
+3. Add list mappings in the **Conditional Lists** grid:
+   - **Form Field**: The form field to check (e.g., a checkbox group, radio, select, or toggle)
+   - **Option**: For multi-option fields, the specific option value to match. Leave empty for toggle fields.
+   - **ActiveCampaign List**: The list to subscribe the contact to when the condition is met
+
+### Examples
+
+**Toggle field** (e.g., "Subscribe to newsletter"):
+- Form Field: `newsletter` — Option: *(empty)* — List: "Newsletter"
+- The contact is subscribed when the toggle is on.
+
+**Checkbox group** (e.g., "Interests"):
+- Form Field: `interests` — Option: `product_updates` — List: "Product Updates"
+- Form Field: `interests` — Option: `blog_posts` — List: "Blog Subscribers"
+- The contact is subscribed to each list whose option is checked.
+
 ## Field Mapping
 
 Use merge fields to map your Statamic form fields to ActiveCampaign contact fields. Both standard fields (`firstName`, `lastName`, `phone`) and custom fields from your ActiveCampaign account are available in the merge fields dropdown.

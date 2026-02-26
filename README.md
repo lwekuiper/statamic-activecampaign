@@ -14,6 +14,7 @@ A powerful Statamic addon that seamlessly integrates your forms with ActiveCampa
 - **Contact Sync**: Automatically create or update contacts in ActiveCampaign
 - **Custom Fields**: Map form fields to ActiveCampaign custom fields
 - **Consent Management**: Built-in GDPR compliance with consent field support
+- **Conditional Lists**: Subscribe contacts to lists based on form field values
 - **Tag Assignment**: Automatically tag contacts upon form submission
 - **Array Field Support**: Handle multi-select fields and arrays seamlessly
 
