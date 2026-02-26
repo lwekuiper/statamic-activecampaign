@@ -68,6 +68,31 @@ class AddFromSubmission
         );
     }
 
+    public function getSubscribedListFieldIds(): array
+    {
+        $listFields = $this->config->value('list_fields') ?? [];
+
+        return collect($listFields)
+            ->filter(function ($row) {
+                $fieldData = $this->data->get($row['form_field'] ?? '');
+                $subscriptionValue = $row['form_option'] ?? null;
+
+                if ($subscriptionValue !== null && $subscriptionValue !== '') {
+                    return in_array($subscriptionValue, Arr::wrap($fieldData));
+                }
+
+                return filter_var(
+                    Arr::get(Arr::wrap($fieldData), 0, false),
+                    FILTER_VALIDATE_BOOLEAN
+                );
+            })
+            ->pluck('activecampaign_list_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     public function handle(SubmissionCreated $event): void
     {
         if (! $this->hasFormConfig($event->submission)) {
@@ -78,13 +103,29 @@ class AddFromSubmission
             return;
         }
 
+        $listMode = $this->config->value('list_mode') ?? 'always';
+
+        $alwaysListIds = in_array($listMode, ['always', 'both'])
+            ? ($this->config->value('list_ids') ?? [])
+            : [];
+
+        $conditionalListIds = in_array($listMode, ['conditional', 'both'])
+            ? $this->getSubscribedListFieldIds()
+            : [];
+
+        $allListIds = array_unique(array_merge($alwaysListIds, $conditionalListIds));
+
+        if (empty($allListIds) && empty($this->config->value('tag_ids'))) {
+            return;
+        }
+
         if (! $contact = $this->syncContact()) {
             return;
         }
 
         $contactId = Arr::get($contact, 'contact.id');
 
-        foreach ($this->config->value('list_ids') ?? [] as $listId) {
+        foreach ($allListIds as $listId) {
             $this->updateListStatus($contactId, $listId);
         }
 
