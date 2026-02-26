@@ -11,6 +11,7 @@ use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignList;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignMergeFields;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignTag;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\StatamicFormFields;
+use Lwekuiper\StatamicActivecampaign\Fieldtypes\StatamicFormFieldOptions;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
 use Lwekuiper\StatamicActivecampaign\Listeners\EnsureFormConfigLocalizationsExist;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigRepository;
@@ -33,6 +34,7 @@ class ServiceProvider extends AddonServiceProvider
         ActivecampaignMergeFields::class,
         ActivecampaignTag::class,
         StatamicFormFields::class,
+        StatamicFormFieldOptions::class,
     ];
 
     protected $listen = [
