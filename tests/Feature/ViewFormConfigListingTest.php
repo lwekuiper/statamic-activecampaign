@@ -214,6 +214,30 @@ class ViewFormConfigListingTest extends TestCase
     }
 
     #[Test]
+    public function it_counts_both_always_and_conditional_lists()
+    {
+        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $user = User::make()->assignRole('test')->save();
+
+        $form = tap(Form::make('form_one')->title('Form One'))->save();
+
+        $formConfig = tap(FormConfig::make()->form($form)->locale('default'));
+        $formConfig->emailField('email')->listMode('both')->listIds([1])->tagIds([1]);
+        $formConfig->listFields([
+            ['form_field' => 'subscribe_weekly', 'activecampaign_list_id' => '10'],
+            ['form_field' => 'subscribe_monthly', 'activecampaign_list_id' => '20'],
+        ]);
+        $formConfig->save();
+
+        $this->actingAs($user)
+            ->getJson(cp_route('activecampaign.index'))
+            ->assertOk()
+            ->assertJson(['formConfigs' => [
+                ['lists' => 3],
+            ]]);
+    }
+
+    #[Test]
     public function it_shows_unconfigured_forms_as_draft()
     {
         $this->setTestRoles(['test' => ['access cp', 'configure forms']]);

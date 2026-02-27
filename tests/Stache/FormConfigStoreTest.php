@@ -120,4 +120,34 @@ class FormConfigStoreTest extends TestCase
         $this->assertEquals([2, 3], $item->listIds());
         $this->assertEquals([6, 7], $item->tagIds());
     }
+
+    #[Test]
+    public function it_defaults_list_mode_to_always_for_existing_configs()
+    {
+        $contents = "email_field: email\nlist_ids:\n  - 1";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/test_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals('always', $item->listMode());
+        $this->assertEquals([], $item->listFields());
+    }
+
+    #[Test]
+    public function it_reads_list_mode_and_list_fields_from_file()
+    {
+        $contents = "email_field: email\nlist_mode: conditional\nlist_fields:\n  -\n    form_field: subscribe_weekly\n    activecampaign_list_id: '10'";
+        $item = $this->store->makeItemFromFile(
+            Path::tidy($this->store->directory().'/conditional_form.yaml'),
+            $contents
+        );
+
+        $this->assertInstanceOf(FormConfig::class, $item);
+        $this->assertEquals('conditional', $item->listMode());
+        $this->assertCount(1, $item->listFields());
+        $this->assertEquals('subscribe_weekly', $item->listFields()[0]['form_field']);
+        $this->assertEquals('10', $item->listFields()[0]['activecampaign_list_id']);
+    }
 }

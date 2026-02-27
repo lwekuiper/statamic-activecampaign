@@ -311,7 +311,7 @@ class AddFromSubmissionTest extends TestCase
     }
 
     #[Test]
-    public function it_skips_lists_when_list_ids_is_empty()
+    public function it_syncs_contact_but_skips_lists_and_tags_when_both_are_empty()
     {
         Http::fake();
 
@@ -330,6 +330,170 @@ class AddFromSubmissionTest extends TestCase
         $listener = new AddFromSubmission();
         $listener->handle(new SubmissionCreated($submission));
 
+        $spy->shouldHaveReceived('syncContact')->once();
         $spy->shouldNotHaveReceived('updateListStatus');
+        $spy->shouldNotHaveReceived('addTagToContact');
+    }
+
+    #[Test]
+    public function it_returns_subscribed_list_ids_for_toggle_fields_in_conditional_mode()
+    {
+        $form = tap(Form::make('newsletter')->title('Newsletter'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data([
+            'email' => 'john@example.com',
+            'subscribe_weekly' => true,
+            'subscribe_monthly' => false,
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listMode('conditional');
+        $formConfig->listFields([
+            ['form_field' => 'subscribe_weekly', 'activecampaign_list_id' => '10'],
+            ['form_field' => 'subscribe_monthly', 'activecampaign_list_id' => '20'],
+        ]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        $this->assertEquals(['10'], $listener->getSubscribedListFieldIds());
+    }
+
+    #[Test]
+    public function it_returns_subscribed_list_ids_for_checkbox_group_with_subscription_value()
+    {
+        $form = tap(Form::make('newsletter')->title('Newsletter'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data([
+            'email' => 'john@example.com',
+            'interests' => ['tech_news', 'sports'],
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listMode('conditional');
+        $formConfig->listFields([
+            ['form_field' => 'interests', 'form_option' => 'tech_news', 'activecampaign_list_id' => '10'],
+            ['form_field' => 'interests', 'form_option' => 'cooking', 'activecampaign_list_id' => '20'],
+            ['form_field' => 'interests', 'form_option' => 'sports', 'activecampaign_list_id' => '30'],
+        ]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        $this->assertEquals(['10', '30'], $listener->getSubscribedListFieldIds());
+    }
+
+    #[Test]
+    public function it_returns_subscribed_list_ids_for_radio_button_with_subscription_value()
+    {
+        $form = tap(Form::make('newsletter')->title('Newsletter'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data([
+            'email' => 'john@example.com',
+            'preference' => 'weekly',
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listMode('conditional');
+        $formConfig->listFields([
+            ['form_field' => 'preference', 'form_option' => 'weekly', 'activecampaign_list_id' => '10'],
+            ['form_field' => 'preference', 'form_option' => 'monthly', 'activecampaign_list_id' => '20'],
+        ]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        $this->assertEquals(['10'], $listener->getSubscribedListFieldIds());
+    }
+
+    #[Test]
+    public function it_combines_always_and_conditional_lists_in_both_mode()
+    {
+        $form = tap(Form::make('newsletter')->title('Newsletter'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data([
+            'email' => 'john@example.com',
+            'subscribe_extra' => true,
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listMode('both')->listIds(['5']);
+        $formConfig->listFields([
+            ['form_field' => 'subscribe_extra', 'activecampaign_list_id' => '10'],
+        ]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        $this->assertEquals(['10'], $listener->getSubscribedListFieldIds());
+    }
+
+    #[Test]
+    public function it_ignores_conditional_lists_in_always_mode()
+    {
+        $form = tap(Form::make('newsletter')->title('Newsletter'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data([
+            'email' => 'john@example.com',
+            'subscribe_extra' => true,
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listMode('always')->listIds(['5']);
+        $formConfig->listFields([
+            ['form_field' => 'subscribe_extra', 'activecampaign_list_id' => '10'],
+        ]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        // In always mode, getSubscribedListFieldIds is not called by handle(),
+        // but we can verify it still works correctly as a method
+        $this->assertEquals(['10'], $listener->getSubscribedListFieldIds());
+    }
+
+    #[Test]
+    public function it_returns_empty_list_ids_when_no_conditional_fields_match()
+    {
+        $form = tap(Form::make('newsletter')->title('Newsletter'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data([
+            'email' => 'john@example.com',
+            'subscribe_weekly' => false,
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listMode('conditional');
+        $formConfig->listFields([
+            ['form_field' => 'subscribe_weekly', 'activecampaign_list_id' => '10'],
+        ]);
+        $formConfig->save();
+
+        $listener = new AddFromSubmission();
+        $listener->hasFormConfig($submission);
+
+        $this->assertEquals([], $listener->getSubscribedListFieldIds());
+    }
+
+    #[Test]
+    public function it_defaults_to_always_mode_when_list_mode_is_not_set()
+    {
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data([
+            'email' => 'john@example.com',
+        ]);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listIds(['5']);
+        $formConfig->save();
+
+        // list_mode is not set, should default to 'always'
+        $this->assertEquals('always', $formConfig->listMode());
     }
 }

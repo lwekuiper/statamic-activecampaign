@@ -36,7 +36,14 @@ class FormConfigController extends CpController
 
             $resolvedValues = $resolved?->values() ?? collect();
             $resolvedListIds = $resolvedValues->get('list_ids', []);
+            $resolvedListFields = $resolvedValues->get('list_fields', []);
             $resolvedTagIds = $resolvedValues->get('tag_ids', []);
+
+            $conditionalListCount = collect($resolvedListFields)
+                ->pluck('activecampaign_list_id')
+                ->filter()
+                ->unique()
+                ->count();
 
             $hasLocalData = $localConfig !== null && ! $localConfig->data()->isEmpty();
             $hasValues = $resolvedValues->filter()->isNotEmpty();
@@ -44,7 +51,7 @@ class FormConfigController extends CpController
             return [
                 'title' => $form->title(),
                 'edit_url' => cp_route('activecampaign.form-config.edit', ['form' => $form->handle(), ...$urlParams]),
-                'lists' => count($resolvedListIds),
+                'lists' => count($resolvedListIds) + $conditionalListCount,
                 'tags' => count($resolvedTagIds),
                 'delete_url' => $hasLocalData ? cp_route('activecampaign.form-config.destroy', ['form' => $form->handle(), ...$urlParams]) : null,
                 'status' => $hasValues ? 'published' : 'draft',
@@ -256,6 +263,7 @@ class FormConfigController extends CpController
                     'display' => 'General',
                     'sections' => [
                         [
+                            'display' => 'Subscriber',
                             'fields' => [
                                 [
                                     'handle' => 'email_field',
@@ -264,8 +272,8 @@ class FormConfigController extends CpController
                                         'instructions' => 'The form field that contains the email of the subscriber.',
                                         'type' => 'statamic_form_fields',
                                         'validate' => 'required',
-                                        'width' => 50,
                                         'localizable' => true,
+                                        'width' => 50,
                                     ],
                                 ],
                                 [
@@ -274,19 +282,89 @@ class FormConfigController extends CpController
                                         'display' => 'Consent Field',
                                         'instructions' => 'The form field that contains the consent of the subscriber.',
                                         'type' => 'statamic_form_fields',
-                                        'width' => 50,
                                         'localizable' => true,
+                                        'width' => 50,
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'display' => 'Lists',
+                            'fields' => [
+                                [
+                                    'handle' => 'list_mode',
+                                    'field' => [
+                                        'display' => 'List Mode',
+                                        'instructions' => 'How subscribers are added to lists.',
+                                        'type' => 'button_group',
+                                        'default' => 'always',
+                                        'validate' => 'required',
+                                        'localizable' => true,
+                                        'options' => [
+                                            'always' => 'Always',
+                                            'conditional' => 'Conditional',
+                                            'both' => 'Both',
+                                        ],
                                     ],
                                 ],
                                 [
                                     'handle' => 'list_ids',
                                     'field' => [
                                         'display' => 'Lists',
-                                        'instructions' => 'The ActiveCampaign lists you want to add the subscriber to.',
+                                        'instructions' => 'The ActiveCampaign lists all subscribers are added to.',
                                         'type' => 'activecampaign_list',
-                                        'validate' => 'required',
-                                        'width' => 50,
+                                        'validate' => 'required_if:list_mode,always,both',
                                         'localizable' => true,
+                                        'if' => [
+                                            'list_mode' => 'contains_any always, both',
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'handle' => 'list_fields',
+                                    'field' => [
+                                        'display' => 'Conditional Lists',
+                                        'instructions' => 'Map form fields to ActiveCampaign lists. For multi-option fields (checkboxes, radio, select, button group), select the option to match. For toggle fields, leave the option empty.',
+                                        'type' => 'grid',
+                                        'mode' => 'stacked',
+                                        'listable' => 'hidden',
+                                        'fullscreen' => false,
+                                        'localizable' => true,
+                                        'validate' => 'required_if:list_mode,conditional,both',
+                                        'add_row' => 'Add List Mapping',
+                                        'if' => [
+                                            'list_mode' => 'contains_any conditional, both',
+                                        ],
+                                        'fields' => [
+                                            [
+                                                'handle' => 'form_field',
+                                                'field' => [
+                                                    'display' => 'Form Field',
+                                                    'type' => 'statamic_form_fields',
+                                                    'validate' => 'required',
+                                                    'width' => 50,
+                                                ],
+                                            ],
+                                            [
+                                                'handle' => 'form_option',
+                                                'field' => [
+                                                    'display' => 'Option',
+                                                    'type' => 'statamic_form_field_options',
+                                                    'width' => 50,
+                                                ],
+                                            ],
+                                            [
+                                                'handle' => 'activecampaign_list_id',
+                                                'field' => [
+                                                    'display' => 'ActiveCampaign List',
+                                                    'type' => 'activecampaign_list',
+                                                    'mode' => 'select',
+                                                    'max_items' => 1,
+                                                    'validate' => 'required',
+                                                    'width' => 100,
+                                                ],
+                                            ],
+                                        ],
                                     ],
                                 ],
                                 [
@@ -295,10 +373,14 @@ class FormConfigController extends CpController
                                         'display' => 'Tags',
                                         'instructions' => 'The ActiveCampaign tags you want to add to the subscriber.',
                                         'type' => 'activecampaign_tag',
-                                        'width' => 50,
                                         'localizable' => true,
                                     ],
                                 ],
+                            ],
+                        ],
+                        [
+                            'display' => 'Field Mapping',
+                            'fields' => [
                                 [
                                     'handle' => 'merge_fields',
                                     'field' => [
@@ -308,15 +390,16 @@ class FormConfigController extends CpController
                                         'mode' => 'table',
                                         'listable' => 'hidden',
                                         'fullscreen' => false,
+                                        'localizable' => true,
                                         'width' => 100,
                                         'add_row' => 'Add Merge Field',
-                                        'localizable' => true,
                                         'fields' => [
                                             [
                                                 'handle' => 'statamic_field',
                                                 'field' => [
                                                     'display' => 'Form Field',
                                                     'type' => 'statamic_form_fields',
+                                                    'validate' => 'required',
                                                 ],
                                             ],
                                             [
@@ -324,6 +407,7 @@ class FormConfigController extends CpController
                                                 'field' => [
                                                     'display' => 'Merge Field',
                                                     'type' => 'activecampaign_merge_fields',
+                                                    'validate' => 'required',
                                                 ],
                                             ],
                                         ],

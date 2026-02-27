@@ -32,9 +32,11 @@ class UpdateFormConfigTest extends TestCase
             ->actingAs($user)
             ->patchJson($formConfig->updateUrl(), [
                 'email_field' => 'email',
+                'list_mode' => 'always',
                 'list_ids' => [2],
                 'consent_field' => 'consent',
-                'tag_ids' => [2]
+                'tag_ids' => [2],
+                'merge_fields' => [],
             ])
             ->assertSuccessful();
 
