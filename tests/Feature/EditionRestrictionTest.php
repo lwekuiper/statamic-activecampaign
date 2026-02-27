@@ -90,7 +90,12 @@ class EditionRestrictionTest extends TestCase
         $formConfigDefault->emailField('email')->listIds([1]);
         $formConfigDefault->save();
 
-        Http::fake();
+        Http::fake([
+            '*/api/3/lists*' => Http::response(['lists' => []], 200),
+            '*/api/3/tags*' => Http::response(['tags' => []], 200),
+            '*/api/3/fields*' => Http::response(['fields' => []], 200),
+            '*' => Http::response([], 200),
+        ]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form', 'site' => 'nl']))
@@ -123,7 +128,12 @@ class EditionRestrictionTest extends TestCase
 
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
-        Http::fake();
+        Http::fake([
+            '*/api/3/lists*' => Http::response(['lists' => []], 200),
+            '*/api/3/tags*' => Http::response(['tags' => []], 200),
+            '*/api/3/fields*' => Http::response(['fields' => []], 200),
+            '*' => Http::response([], 200),
+        ]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form']))
@@ -181,7 +191,12 @@ class EditionRestrictionTest extends TestCase
         $formConfigNl->emailField('email')->listIds([2]);
         $formConfigNl->save();
 
-        Http::fake();
+        Http::fake([
+            '*/api/3/lists*' => Http::response(['lists' => []], 200),
+            '*/api/3/tags*' => Http::response(['tags' => []], 200),
+            '*/api/3/fields*' => Http::response(['fields' => []], 200),
+            '*' => Http::response([], 200),
+        ]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form', 'site' => 'nl']))
@@ -227,7 +242,12 @@ class EditionRestrictionTest extends TestCase
 
         $form = tap(Form::make('test_form')->title('Test Form'))->save();
 
-        Http::fake();
+        Http::fake([
+            '*/api/3/lists*' => Http::response(['lists' => []], 200),
+            '*/api/3/tags*' => Http::response(['tags' => []], 200),
+            '*/api/3/fields*' => Http::response(['fields' => []], 200),
+            '*' => Http::response([], 200),
+        ]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form', 'site' => 'en']))
@@ -328,7 +348,12 @@ class EditionRestrictionTest extends TestCase
         $formConfig->emailField('email')->listIds([1]);
         $formConfig->save();
 
-        Http::fake();
+        Http::fake([
+            '*/api/3/lists*' => Http::response(['lists' => []], 200),
+            '*/api/3/tags*' => Http::response(['tags' => []], 200),
+            '*/api/3/fields*' => Http::response(['fields' => []], 200),
+            '*' => Http::response([], 200),
+        ]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form']))
@@ -377,7 +402,12 @@ class EditionRestrictionTest extends TestCase
         $formConfig->emailField('email')->listIds([1]);
         $formConfig->save();
 
-        Http::fake();
+        Http::fake([
+            '*/api/3/lists*' => Http::response(['lists' => []], 200),
+            '*/api/3/tags*' => Http::response(['tags' => []], 200),
+            '*/api/3/fields*' => Http::response(['fields' => []], 200),
+            '*' => Http::response([], 200),
+        ]);
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.form-config.edit',['form' => 'test_form']))
