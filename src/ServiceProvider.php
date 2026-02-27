@@ -10,6 +10,7 @@ use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActiveCampaignSites;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignList;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignMergeFields;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignTag;
+use Lwekuiper\StatamicActivecampaign\Fieldtypes\StatamicFormFieldOptions;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\StatamicFormFields;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
 use Lwekuiper\StatamicActivecampaign\Listeners\EnsureFormConfigLocalizationsExist;
@@ -31,6 +32,7 @@ class ServiceProvider extends AddonServiceProvider
         ActivecampaignList::class,
         ActivecampaignMergeFields::class,
         ActivecampaignTag::class,
+        StatamicFormFieldOptions::class,
         StatamicFormFields::class,
     ];
 
