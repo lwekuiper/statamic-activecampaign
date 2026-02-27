@@ -29,6 +29,10 @@ class GetMergeFieldsController extends Controller
             ]
         ];
 
+        if (! ActiveCampaign::isConfigured()) {
+            return $standardFields;
+        }
+
         $response = ActiveCampaign::getCustomFields();
 
         $customFields = collect(Arr::get($response, 'fields', []))

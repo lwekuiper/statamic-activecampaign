@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lwekuiper\StatamicActivecampaign\Fieldtypes;
 
 use Statamic\Support\Arr;
@@ -15,9 +17,11 @@ class ActiveCampaignTag extends Relationship
 
     public function getIndexItems($request)
     {
-        $response = ActiveCampaign::getTags();
+        if (! ActiveCampaign::isConfigured()) {
+            abort(403, __('ActiveCampaign API credentials are not configured.'));
+        }
 
-        $tags = Arr::get($response, 'tags', []);
+        $tags = Arr::get(ActiveCampaign::getTags(), 'tags', []);
 
         return collect($tags)->map(fn ($tag) => [
             'id' => $tag['id'],
@@ -31,8 +35,7 @@ class ActiveCampaignTag extends Relationship
             return [];
         }
 
-        $response = ActiveCampaign::getTags();
-        $tags = Arr::get($response, 'tags', []);
+        $tags = Arr::get(ActiveCampaign::getTags(), 'tags', []);
         $tag = collect($tags)->firstWhere('id', $id);
 
         if (! $tag) {
