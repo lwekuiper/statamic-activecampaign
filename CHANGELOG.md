@@ -2,6 +2,11 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.3.1 (2026-02-27)
+
+### What's fixed
+- Fix blueprint loading failure where `getBlueprint()` returned `null` because `Blueprint::find()` could not locate the YAML blueprint file. The blueprint is now built programmatically.
+
 ## 3.3.0 (2026-02-13)
 
 ### What's new

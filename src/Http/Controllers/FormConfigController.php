@@ -250,6 +250,90 @@ class FormConfigController extends CpController
      */
     private function getBlueprint(): BlueprintContract
     {
-        return Blueprint::find('statamic-activecampaign::config');
+        return Blueprint::make()->setContents([
+            'tabs' => [
+                'general' => [
+                    'display' => 'General',
+                    'sections' => [
+                        [
+                            'fields' => [
+                                [
+                                    'handle' => 'email_field',
+                                    'field' => [
+                                        'display' => 'Email Field',
+                                        'instructions' => 'The form field that contains the email of the subscriber.',
+                                        'type' => 'statamic_form_fields',
+                                        'validate' => 'required',
+                                        'width' => 50,
+                                        'localizable' => true,
+                                    ],
+                                ],
+                                [
+                                    'handle' => 'consent_field',
+                                    'field' => [
+                                        'display' => 'Consent Field',
+                                        'instructions' => 'The form field that contains the consent of the subscriber.',
+                                        'type' => 'statamic_form_fields',
+                                        'width' => 50,
+                                        'localizable' => true,
+                                    ],
+                                ],
+                                [
+                                    'handle' => 'list_ids',
+                                    'field' => [
+                                        'display' => 'Lists',
+                                        'instructions' => 'The ActiveCampaign lists you want to add the subscriber to.',
+                                        'type' => 'activecampaign_list',
+                                        'validate' => 'required',
+                                        'width' => 50,
+                                        'localizable' => true,
+                                    ],
+                                ],
+                                [
+                                    'handle' => 'tag_ids',
+                                    'field' => [
+                                        'display' => 'Tags',
+                                        'instructions' => 'The ActiveCampaign tags you want to add to the subscriber.',
+                                        'type' => 'activecampaign_tag',
+                                        'width' => 50,
+                                        'localizable' => true,
+                                    ],
+                                ],
+                                [
+                                    'handle' => 'merge_fields',
+                                    'field' => [
+                                        'display' => 'Merge Fields',
+                                        'instructions' => 'Add the form fields you want to map to ActiveCampaign fields.',
+                                        'type' => 'grid',
+                                        'mode' => 'table',
+                                        'listable' => 'hidden',
+                                        'fullscreen' => false,
+                                        'width' => 100,
+                                        'add_row' => 'Add Merge Field',
+                                        'localizable' => true,
+                                        'fields' => [
+                                            [
+                                                'handle' => 'statamic_field',
+                                                'field' => [
+                                                    'display' => 'Form Field',
+                                                    'type' => 'statamic_form_fields',
+                                                ],
+                                            ],
+                                            [
+                                                'handle' => 'activecampaign_field',
+                                                'field' => [
+                                                    'display' => 'Merge Field',
+                                                    'type' => 'activecampaign_merge_fields',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
     }
 }
