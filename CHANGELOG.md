@@ -2,6 +2,16 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.4.0 (2026-02-28)
+
+### What's new
+- Add conditional list subscriptions with list mode (always/conditional/both) and field-to-list mapping
+- Add form field options fieldtype for selecting options from multi-option form fields (select, radio, checkboxes, button_group)
+
+### What's changed
+- Remove defensive error handling from connector: add `isConfigured()` method, use `->throw()` on HTTP client, return non-nullable arrays
+- Restructure form config blueprint into Subscriber, Lists, and Field Mapping sections
+
 ## 3.3.1 (2026-02-27)
 
 ### What's fixed
