@@ -2,6 +2,17 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.4.0 (2026-02-27)
+
+### What's new
+- Conditional list subscriptions with three modes: Always, Conditional, and Both
+- Form field options fieldtype for mapping form field options to ActiveCampaign lists
+- Require both fields in merge_fields grid rows
+
+### What's changed
+- Removed defensive error handling from connector in favor of `throw()` and `isConfigured()` guard
+- Added `isConfigured()` checks to fieldtypes and merge fields controller
+
 ## 3.3.0 (2026-02-13)
 
 ### What's new
