@@ -436,6 +436,7 @@ class EditionRestrictionTest extends TestCase
         $this->actingAs($user)
             ->patchJson(cp_route('activecampaign.form-config.update',['form' => 'test_form', 'site' => 'nl']), [
                 'email_field' => 'email',
+                'list_mode' => 'always',
                 'list_ids' => [1],
                 'consent_field' => null,
                 'tag_ids' => [],
@@ -483,6 +484,7 @@ class EditionRestrictionTest extends TestCase
         $this->actingAs($user)
             ->patchJson(cp_route('activecampaign.form-config.update',['form' => 'test_form', 'site' => 'nl']), [
                 'email_field' => 'email',
+                'list_mode' => 'always',
                 'list_ids' => [2],
                 'consent_field' => null,
                 'tag_ids' => [],

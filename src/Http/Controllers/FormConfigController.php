@@ -36,6 +36,7 @@ class FormConfigController extends CpController
 
             $resolvedValues = $resolved?->values() ?? collect();
             $resolvedListIds = $resolvedValues->get('list_ids', []);
+            $resolvedListFields = $resolvedValues->get('list_fields', []);
             $resolvedTagIds = $resolvedValues->get('tag_ids', []);
 
             $hasLocalData = $localConfig !== null && ! $localConfig->data()->isEmpty();
@@ -44,7 +45,7 @@ class FormConfigController extends CpController
             return [
                 'title' => $form->title(),
                 'edit_url' => cp_route('activecampaign.form-config.edit', ['form' => $form->handle(), ...$urlParams]),
-                'lists' => count($resolvedListIds),
+                'lists' => count($resolvedListIds) + count($resolvedListFields),
                 'tags' => count($resolvedTagIds),
                 'delete_url' => $hasLocalData ? cp_route('activecampaign.form-config.destroy', ['form' => $form->handle(), ...$urlParams]) : null,
                 'status' => $hasValues ? 'published' : 'draft',
