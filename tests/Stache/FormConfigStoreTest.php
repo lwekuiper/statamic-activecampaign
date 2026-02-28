@@ -21,7 +21,7 @@ class FormConfigStoreTest extends TestCase
     {
         parent::setUp();
 
-        $this->store = Stache::store('form-configs');
+        $this->store = Stache::store('activecampaign-form-configs');
     }
 
     #[Test]

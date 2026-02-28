@@ -22,7 +22,7 @@ class FormConfigStore extends BasicStore
 
     public function key()
     {
-        return 'form-configs';
+        return 'activecampaign-form-configs';
     }
 
     public function getItemFilter(SplFileInfo $file)
