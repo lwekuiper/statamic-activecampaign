@@ -18,7 +18,7 @@ class FormConfigRepository
     public function __construct(Stache $stache)
     {
         $this->stache = $stache;
-        $this->store = $stache->store('form-configs');
+        $this->store = $stache->store('activecampaign-form-configs');
     }
 
     public function make(): FormConfig

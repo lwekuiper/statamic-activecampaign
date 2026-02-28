@@ -132,7 +132,7 @@ class FormConfig implements Localization
     public function path()
     {
         return vsprintf('%s/%s%s.%s', [
-            rtrim(Stache::store('form-configs')->directory(), '/'),
+            rtrim(Stache::store('activecampaign-form-configs')->directory(), '/'),
             Site::multiEnabled() ? $this->locale().'/' : '',
             $this->handle(),
             'yaml',
