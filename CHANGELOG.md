@@ -2,6 +2,11 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 2.4.2 (2026-02-28)
+
+### What's fixed
+- Namespace Stache store handle from `form-configs` to `activecampaign-form-configs` to avoid conflicts when multiple form-config addons are installed. Run `php please stache:clear` after upgrading.
+
 ## 2.4.1 (2026-02-27)
 
 ### What's fixed
