@@ -10,6 +10,10 @@ class GetMergeFieldsController extends Controller
 {
     public function __invoke(): array
     {
+        if (! ActiveCampaign::isConfigured()) {
+            return [];
+        }
+
         $standardFields = [
             [
                 'id' => 'email',

@@ -15,6 +15,10 @@ class ActiveCampaignTag extends Relationship
 
     public function getIndexItems($request)
     {
+        if (! ActiveCampaign::isConfigured()) {
+            abort(403, __('ActiveCampaign API credentials are not configured.'));
+        }
+
         $response = ActiveCampaign::getTags();
 
         $tags = Arr::get($response, 'tags', []);

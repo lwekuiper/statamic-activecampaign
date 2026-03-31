@@ -19,6 +19,11 @@ class ActiveCampaignConnector
         $this->key = config('statamic.activecampaign.api_key');
     }
 
+    public function isConfigured(): bool
+    {
+        return ! empty($this->baseUrl) && ! empty($this->key);
+    }
+
     public function syncContact($email, $data): ?array
     {
         $contact = array_merge(['email' => $email], $data);

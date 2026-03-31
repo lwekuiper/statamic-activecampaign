@@ -15,6 +15,10 @@ class ActiveCampaignList extends Relationship
 
     public function getIndexItems($request)
     {
+        if (! ActiveCampaign::isConfigured()) {
+            abort(403, __('ActiveCampaign API credentials are not configured.'));
+        }
+
         $response = ActiveCampaign::getLists();
 
         $lists = Arr::get($response, 'lists', []);
