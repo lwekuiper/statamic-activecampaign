@@ -35,7 +35,7 @@ class ViewFormConfigListingTest extends TestCase
 
         $this->actingAs($user)
             ->get(cp_route('activecampaign.index'))
-            ->assertUnauthorized();
+            ->assertForbidden();
 
         $this->assertCount(1, Form::all());
     }
@@ -43,7 +43,7 @@ class ViewFormConfigListingTest extends TestCase
     #[Test]
     public function it_lists_all_forms_with_status()
     {
-        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $this->setTestRoles(['test' => ['access cp', 'view activecampaign', 'edit activecampaign']]);
         $user = User::make()->assignRole('test')->save();
 
         $form_one = tap(Form::make('form_one')->title('Form One'))->save();
@@ -91,7 +91,7 @@ class ViewFormConfigListingTest extends TestCase
             'access cp',
             'access en site',
             'access nl site',
-            'configure forms',
+            'view activecampaign', 'edit activecampaign',
         ]]);
         $user = User::make()->assignRole('test')->save();
 
@@ -136,7 +136,7 @@ class ViewFormConfigListingTest extends TestCase
             'access cp',
             'access en site',
             'access nl site',
-            'configure forms',
+            'view activecampaign', 'edit activecampaign',
         ]]);
         $user = User::make()->assignRole('test')->save();
 
@@ -185,7 +185,7 @@ class ViewFormConfigListingTest extends TestCase
             'access cp',
             'access en site',
             'access nl site',
-            'configure forms',
+            'view activecampaign', 'edit activecampaign',
         ]]);
         $user = User::make()->assignRole('test')->save();
 
@@ -216,7 +216,7 @@ class ViewFormConfigListingTest extends TestCase
     #[Test]
     public function it_shows_unconfigured_forms_as_draft()
     {
-        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $this->setTestRoles(['test' => ['access cp', 'view activecampaign', 'edit activecampaign']]);
         $user = User::make()->assignRole('test')->save();
 
         tap(Form::make('contact')->title('Contact Form'))->save();

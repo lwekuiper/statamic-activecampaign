@@ -19,7 +19,7 @@ class EditFormConfigTest extends TestCase
     #[Test]
     public function it_shows_the_edit_form_config_page()
     {
-        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $this->setTestRoles(['test' => ['access cp', 'view activecampaign', 'edit activecampaign']]);
         $user = User::make()->assignRole('test')->save();
 
         $form = tap(Form::make('test_form')->title('Test Form'))->save();

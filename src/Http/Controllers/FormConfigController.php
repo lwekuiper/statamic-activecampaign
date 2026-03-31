@@ -22,7 +22,7 @@ class FormConfigController extends CpController
     public function index(Request $request)
     {
         $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
+        abort_unless($user->isSuper() || $user->hasPermission('view activecampaign'), 403);
 
         [$site, $edition] = $this->getAddonContext($request);
 
@@ -88,6 +88,9 @@ class FormConfigController extends CpController
 
     public function edit(Request $request, Form $form)
     {
+        $user = User::current();
+        abort_unless($user->isSuper() || $user->hasPermission('view activecampaign'), 403);
+
         [$site, $edition] = $this->getAddonContext($request);
 
         $blueprint = $this->getBlueprint();
@@ -165,6 +168,9 @@ class FormConfigController extends CpController
 
     public function update(Request $request, Form $form)
     {
+        $user = User::current();
+        abort_unless($user->isSuper() || $user->hasPermission('edit activecampaign'), 403);
+
         [$site, $edition] = $this->getAddonContext($request);
 
         $blueprint = $this->getBlueprint();
@@ -198,6 +204,9 @@ class FormConfigController extends CpController
 
     public function destroy(Request $request, Form $form)
     {
+        $user = User::current();
+        abort_unless($user->isSuper() || $user->hasPermission('edit activecampaign'), 403);
+
         [$site] = $this->getAddonContext($request);
 
         if (! $formConfig = FormConfig::find($form->handle(), $site)) {

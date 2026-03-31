@@ -40,7 +40,7 @@ class EditionRestrictionTest extends TestCase
             'access cp',
             'access en site',
             'access nl site',
-            'configure forms',
+            'view activecampaign', 'edit activecampaign',
         ]]);
 
         return User::make()->assignRole('test')->save();
@@ -50,7 +50,7 @@ class EditionRestrictionTest extends TestCase
     {
         $this->setTestRoles(['test' => [
             'access cp',
-            'configure forms',
+            'view activecampaign', 'edit activecampaign',
         ]]);
 
         return User::make()->assignRole('test')->save();

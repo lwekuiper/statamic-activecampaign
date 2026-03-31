@@ -18,7 +18,7 @@ class UpdateFormConfigTest extends TestCase
     #[Test]
     public function it_updates_a_form_config()
     {
-        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $this->setTestRoles(['test' => ['access cp', 'view activecampaign', 'edit activecampaign']]);
         $user = tap(User::make()->assignRole('test')->makeSuper())->save();
 
         $form = tap(Form::make('test_form')->title('Test Form'))->save();

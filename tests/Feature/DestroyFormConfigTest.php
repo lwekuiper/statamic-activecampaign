@@ -18,7 +18,7 @@ class DestroyFormConfigTest extends TestCase
     #[Test]
     public function it_deletes_a_form_config()
     {
-        $this->setTestRoles(['test' => ['access cp', 'configure forms']]);
+        $this->setTestRoles(['test' => ['access cp', 'view activecampaign', 'edit activecampaign']]);
         $user = User::make()->assignRole('test')->save();
 
         $form = tap(Form::make('test'))->save();

@@ -18,7 +18,7 @@ class AddonConfigController extends CpController
     public function edit()
     {
         $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
+        abort_unless($user->isSuper() || $user->hasPermission('edit activecampaign'), 403);
 
         $values = [
             'sites' => Site::all()->map(fn ($site) => [
@@ -39,7 +39,7 @@ class AddonConfigController extends CpController
     public function update(Request $request)
     {
         $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
+        abort_unless($user->isSuper() || $user->hasPermission('edit activecampaign'), 403);
 
         $fields = $this->blueprint()->fields()->addValues($request->all());
         $fields->validate();
