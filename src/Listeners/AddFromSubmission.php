@@ -79,7 +79,13 @@ class AddFromSubmission
             return;
         }
 
-        if (! $contact = $this->syncContact()) {
+        $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
+
+        $mergeData = $edition !== 'free' ? $this->getMergeData() : [];
+
+        $email = $this->getEmail();
+
+        if (! $contact = ActiveCampaign::syncContact($email, $mergeData)) {
             return;
         }
 
@@ -89,17 +95,11 @@ class AddFromSubmission
             $this->updateListStatus($contactId, $listId);
         }
 
-        foreach ($this->config->value('tag_ids') ?? [] as $tagId) {
-            $this->addTagToContact($contactId, $tagId);
+        if ($edition !== 'free') {
+            foreach ($this->config->value('tag_ids') ?? [] as $tagId) {
+                $this->addTagToContact($contactId, $tagId);
+            }
         }
-    }
-
-    private function syncContact(): ?array
-    {
-        $email = $this->getEmail();
-        $mergeData = $this->getMergeData();
-
-        return ActiveCampaign::syncContact($email, $mergeData);
     }
 
     private function getMergeData(): array

@@ -23,6 +23,11 @@ abstract class TestCase extends AddonTestCase
         Config::set('statamic.system.multisite', Site::hasMultiple());
     }
 
+    protected function setLiteEdition()
+    {
+        Config::set('statamic.editions.addons.lwekuiper/statamic-activecampaign', 'lite');
+    }
+
     protected function setProEdition()
     {
         Config::set('statamic.editions.addons.lwekuiper/statamic-activecampaign', 'pro');
@@ -32,7 +37,7 @@ abstract class TestCase extends AddonTestCase
     {
         parent::getEnvironmentSetUp($app);
 
-        Addon::get('lwekuiper/statamic-activecampaign')->editions(['lite', 'pro']);
+        Addon::get('lwekuiper/statamic-activecampaign')->editions(['free', 'lite', 'pro']);
 
         $app['config']->set('statamic.activecampaign.store_directory', __DIR__.'/__fixtures__/resources/activecampaign');
     }
@@ -41,8 +46,11 @@ abstract class TestCase extends AddonTestCase
     {
         parent::resolveApplicationConfiguration($app);
 
-        // Assume the pro edition within tests
+        // Assume the pro edition within tests (Statamic Pro, not addon edition)
         $app['config']->set('statamic.editions.pro', true);
+
+        // Default addon edition to lite for backward compatibility
+        $app['config']->set('statamic.editions.addons.lwekuiper/statamic-activecampaign', 'lite');
 
         // Statamic::pushCpRoutes(function () {
         //     return require_once realpath(__DIR__ . '/../routes/cp.php');
