@@ -6,23 +6,24 @@ namespace Lwekuiper\StatamicActivecampaign;
 
 use Lwekuiper\StatamicActivecampaign\Connectors\ActiveCampaignConnector;
 use Lwekuiper\StatamicActivecampaign\Data\AddonConfig;
-use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActiveCampaignSites;
+use Lwekuiper\StatamicActivecampaign\Data\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignList;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignMergeFields;
+use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActiveCampaignSites;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\ActivecampaignTag;
 use Lwekuiper\StatamicActivecampaign\Fieldtypes\StatamicFormFields;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
 use Lwekuiper\StatamicActivecampaign\Listeners\EnsureFormConfigLocalizationsExist;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigRepository;
 use Lwekuiper\StatamicActivecampaign\Stache\FormConfigStore;
-use Statamic\Statamic;
 use Statamic\Events\FormSaved;
 use Statamic\Events\SubmissionCreated;
-use Statamic\Facades\Form;
 use Statamic\Facades\CP\Nav;
+use Statamic\Facades\Form;
 use Statamic\Facades\Site;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Stache\Stache;
+use Statamic\Statamic;
 
 class ServiceProvider extends AddonServiceProvider
 {
@@ -51,16 +52,20 @@ class ServiceProvider extends AddonServiceProvider
 
     public function register()
     {
+        $this->registerSerializableClasses([
+            FormConfig::class,
+        ]);
+
         $this->app->singleton(FormConfigRepository::class, function () {
             return new FormConfigRepository($this->app['stache']);
         });
 
         $this->app->singleton(ActiveCampaignConnector::class, function () {
-            return new ActiveCampaignConnector();
+            return new ActiveCampaignConnector;
         });
 
         $this->app->singleton(AddonConfig::class, function () {
-            return new AddonConfig();
+            return new AddonConfig;
         });
 
         $this->publishes([
@@ -99,7 +104,7 @@ class ServiceProvider extends AddonServiceProvider
             ]);
         });
 
-        $formConfigStore = new FormConfigStore();
+        $formConfigStore = new FormConfigStore;
         $formConfigStore->directory(base_path('resources/activecampaign'));
         app(Stache::class)->registerStore($formConfigStore);
     }
