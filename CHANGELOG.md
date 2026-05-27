@@ -2,6 +2,19 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.4.0 (2026-05-27)
+
+### What's new
+- Laravel 13 support (resolves #9)
+
+### What's changed
+- Minimum PHP version raised to 8.3 (required by Laravel 13)
+- Minimum Statamic version raised to 6.5 (first version with Laravel 13 support)
+- CI now tests against PHP 8.3, 8.4, 8.5 and Laravel 12 + 13
+
+### What's fixed
+- FormConfig entries no longer fail to deserialize from Laravel 13's hardened cache (allowlist registered via Statamic's `registerSerializableClasses` API).
+
 ## 3.3.2 (2026-02-28)
 
 ### What's fixed
