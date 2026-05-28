@@ -25,8 +25,8 @@ A powerful Statamic addon that seamlessly integrates your forms with ActiveCampa
 ## 📋 Requirements
 
 - **PHP**: 8.3 or higher
-- **Laravel**: 12.0 or higher
-- **Statamic**: 6.0 or higher
+- **Laravel**: 12.0 or 13.0
+- **Statamic**: 6.5 or higher
 - **ActiveCampaign Account**: With API access enabled
 
 > **Note**: For Statamic 4.x and 5.x support, use version 2.x of this addon.
