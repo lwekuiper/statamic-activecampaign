@@ -3,10 +3,12 @@ name: Test Suite
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   php_tests:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         php: [8.2, 8.3, 8.4]
