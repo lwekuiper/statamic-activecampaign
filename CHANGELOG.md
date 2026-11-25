@@ -2,6 +2,14 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 2.4.4 (2026-11-25)
+
+### What's fixed
+- Only super users and users with the `configure forms` permission can open the ActiveCampaign pages or use its endpoints. Other control panel users now get a 403 and no longer see the ActiveCampaign navigation item.
+- Reject site handles that do not exist when saving a form config or the addon configuration.
+- A form submission without an email address is now skipped instead of failing.
+- An ActiveCampaign error or connection failure no longer stops the form's emails or shows the visitor an error page. The failure is reported to your application's error log instead.
+
 ## 2.4.2 (2026-02-28)
 
 ### What's fixed
