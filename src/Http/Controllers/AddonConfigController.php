@@ -10,16 +10,12 @@ use Lwekuiper\StatamicActivecampaign\Facades\AddonConfig;
 use Statamic\CP\PublishForm;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Site;
-use Statamic\Facades\User;
 use Statamic\Http\Controllers\CP\CpController;
 
 class AddonConfigController extends CpController
 {
     public function edit()
     {
-        $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
-
         $values = [
             'sites' => Site::all()->map(fn ($site) => [
                 'name' => $site->name(),
@@ -38,9 +34,6 @@ class AddonConfigController extends CpController
 
     public function update(Request $request)
     {
-        $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
-
         $fields = $this->blueprint()->fields()->addValues($request->all());
         $fields->validate();
         $values = $fields->process()->values()->all();

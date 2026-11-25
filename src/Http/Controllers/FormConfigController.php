@@ -12,7 +12,6 @@ use Statamic\Facades\Addon;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Form as FormFacade;
 use Statamic\Facades\Site;
-use Statamic\Facades\User;
 use Statamic\Fields\Blueprint as BlueprintContract;
 use Statamic\Forms\Form;
 use Statamic\Http\Controllers\CP\CpController;
@@ -21,9 +20,6 @@ class FormConfigController extends CpController
 {
     public function index(Request $request)
     {
-        $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
-
         [$site, $edition] = $this->getAddonContext($request);
 
         $urlParams = $edition === 'pro' ? ['site' => $site] : [];

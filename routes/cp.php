@@ -5,8 +5,9 @@ use Lwekuiper\StatamicActivecampaign\Http\Controllers\FormConfigController;
 use Lwekuiper\StatamicActivecampaign\Http\Controllers\GetFormFieldsController;
 use Lwekuiper\StatamicActivecampaign\Http\Controllers\GetMergeFieldsController;
 use Lwekuiper\StatamicActivecampaign\Http\Controllers\AddonConfigController;
+use Lwekuiper\StatamicActivecampaign\Http\Middleware\AuthorizeConfigure;
 
-Route::name('activecampaign.')->prefix('activecampaign')->group(function () {
+Route::name('activecampaign.')->prefix('activecampaign')->middleware(AuthorizeConfigure::class)->group(function () {
     Route::get('/', [FormConfigController::class, 'index'])->name('index');
 
     Route::get('/edit', [AddonConfigController::class, 'edit'])->name('edit');

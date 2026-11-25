@@ -35,7 +35,7 @@ class ViewFormConfigListingTest extends TestCase
 
         $this->actingAs($user)
             ->get(cp_route('activecampaign.index'))
-            ->assertUnauthorized();
+            ->assertForbidden();
 
         $this->assertCount(1, Form::all());
     }
