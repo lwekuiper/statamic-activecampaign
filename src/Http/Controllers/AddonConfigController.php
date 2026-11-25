@@ -10,7 +10,6 @@ use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Statamic\Facades\Addon;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Site;
-use Statamic\Facades\User;
 use Statamic\Http\Controllers\CP\CpController;
 
 class AddonConfigController extends CpController
@@ -20,9 +19,6 @@ class AddonConfigController extends CpController
         if (! $this->isMultiSite()) {
             return redirect()->to(cp_route('activecampaign.index'));
         }
-
-        $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
 
         $blueprint = $this->blueprint();
 
@@ -58,9 +54,6 @@ class AddonConfigController extends CpController
 
     public function update(Request $request)
     {
-        $user = User::current();
-        abort_unless($user->isSuper() || $user->hasPermission('configure forms'), 401);
-
         $fields = $this->blueprint()->fields()->addValues($request->all());
         $fields->validate();
         $values = $fields->process()->values()->all();

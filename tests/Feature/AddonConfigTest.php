@@ -85,7 +85,7 @@ class AddonConfigTest extends TestCase
 
         $this->actingAs($user)
             ->getJson(cp_route('activecampaign.edit'))
-            ->assertUnauthorized();
+            ->assertForbidden();
     }
 
     #[Test]
@@ -198,7 +198,7 @@ class AddonConfigTest extends TestCase
             ->patchJson(cp_route('activecampaign.update'), [
                 'sites' => [],
             ])
-            ->assertUnauthorized();
+            ->assertForbidden();
     }
 
     #[Test]
