@@ -334,4 +334,34 @@ class AddonConfigTest extends TestCase
 
         $this->assertTrue(AddonConfigFacade::isEnabled('default'));
     }
+
+    #[Test]
+    public function it_rejects_a_site_handle_that_does_not_exist()
+    {
+        $this->setProEdition();
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en', 'name' => 'English'],
+            'nl' => ['url' => 'http://localhost/nl/', 'locale' => 'nl', 'name' => 'Dutch'],
+        ]);
+
+        AddonConfigFacade::save(collect(['en' => null]));
+        app(AddonConfig::class)->fresh();
+
+        $form = tap(Form::make('test_form')->title('Test Form'))->save();
+        FormConfig::make()->form($form)->locale('en')->emailField('email')->save();
+
+        $user = tap(User::make()->makeSuper())->save();
+
+        $this->actingAs($user)
+            ->patchJson(cp_route('activecampaign.update'), [
+                'sites' => [
+                    ['handle' => 'en', 'name' => 'English', 'enabled' => true, 'origin' => null],
+                    ['handle' => '../escaped', 'name' => 'Escaped', 'enabled' => true, 'origin' => 'en'],
+                ],
+            ])
+            ->assertUnprocessable();
+
+        $this->assertSame(['en' => null], app(AddonConfig::class)->fresh()->sites()->all());
+        $this->assertNull(FormConfig::find('test_form', '../escaped'));
+    }
 }

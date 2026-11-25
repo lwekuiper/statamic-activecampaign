@@ -202,9 +202,14 @@ class FormConfigController extends CpController
     {
         $edition = Addon::get('lwekuiper/statamic-activecampaign')->edition();
 
-        $site = $edition === 'pro'
-            ? $request->site ?? Site::selected()->handle()
-            : Site::default()->handle();
+        if ($edition !== 'pro') {
+            return [Site::default()->handle(), $edition];
+        }
+
+        $site = $request->site ?? Site::selected()->handle();
+
+        // The handle becomes a directory in the form config's file path.
+        abort_unless(Site::get($site), 404);
 
         return [$site, $edition];
     }
