@@ -2,6 +2,17 @@
 
 All notable changes to `statamic-activecampaign` will be documented in this file.
 
+## 3.4.1 (2026-11-25)
+
+### What's changed
+- Minimum Statamic version raised to 6.10 (first version with the `registerSerializableClasses` API this addon uses; on 6.5 to 6.9 the addon failed to boot)
+
+### What's fixed
+- Every ActiveCampaign page in the Control Panel now requires the "Configure forms" permission. Other users get a 403 and no longer see the navigation item.
+- Saving a form config for a site that does not exist now returns a 404 instead of writing a file for it (Pro edition).
+- Saving the addon settings with a site that does not exist is now rejected.
+- A form submission no longer fails when its email field is empty or ActiveCampaign cannot be reached. The error is reported and Statamic still sends the form's emails.
+
 ## 3.4.0 (2026-05-27)
 
 ### What's new
