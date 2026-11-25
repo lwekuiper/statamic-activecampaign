@@ -230,6 +230,8 @@ class FormConfigController extends CpController
             ? $request->site ?? Site::selected()->handle()
             : Site::default()->handle();
 
+        abort_unless(Site::get($site), 404);
+
         return [$site, $edition];
     }
 

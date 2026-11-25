@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lwekuiper\StatamicActivecampaign\Fieldtypes;
 
 use Illuminate\Contracts\Validation\Rule as ValidationRule;
+use Statamic\Facades\Site;
 use Statamic\Fields\Fieldtype;
 
 class ActiveCampaignSites extends Fieldtype
@@ -16,9 +17,26 @@ class ActiveCampaignSites extends Fieldtype
     public function rules(): array
     {
         return [
+            $this->sitesMustExistRule(),
             $this->cannotAllHaveOriginsRule(),
             $this->originsMustBeEnabledRule(),
         ];
+    }
+
+    private function sitesMustExistRule(): ValidationRule
+    {
+        return new class implements ValidationRule
+        {
+            public function passes($attribute, $value): bool
+            {
+                return collect($value)->pluck('handle')->diff(Site::all()->map->handle())->isEmpty();
+            }
+
+            public function message(): string
+            {
+                return __('Every site must exist in this installation.');
+            }
+        };
     }
 
     private function cannotAllHaveOriginsRule(): ValidationRule

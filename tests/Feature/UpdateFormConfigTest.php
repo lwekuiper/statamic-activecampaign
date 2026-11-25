@@ -3,6 +3,7 @@
 namespace Lwekuiper\StatamicActivecampaign\Tests\Feature;
 
 use Statamic\Facades\Form;
+use Statamic\Facades\Stache;
 use Statamic\Facades\User;
 use PHPUnit\Framework\Attributes\Test;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
@@ -41,5 +42,31 @@ class UpdateFormConfigTest extends TestCase
         $this->assertCount(1, FormConfig::all());
         $formConfig = FormConfig::find('test_form', 'default');
         $this->assertEquals([2], $formConfig->listIds());
+    }
+
+    #[Test]
+    public function it_rejects_a_site_that_does_not_exist_instead_of_writing_outside_the_store()
+    {
+        $this->setProEdition();
+        $this->setSites([
+            'en' => ['url' => 'http://localhost/', 'locale' => 'en', 'name' => 'English'],
+            'nl' => ['url' => 'http://localhost/nl/', 'locale' => 'nl', 'name' => 'Dutch'],
+        ]);
+
+        $user = tap(User::make()->makeSuper())->save();
+        tap(Form::make('test_form')->title('Test Form'))->save();
+
+        $escaped = Stache::store('activecampaign-form-configs')->directory().'/../../evil/test_form.yaml';
+
+        $this
+            ->actingAs($user)
+            ->patchJson(cp_route('activecampaign.form-config.update', ['form' => 'test_form', 'site' => '../../evil']), [
+                'email_field' => 'email',
+                'list_ids' => [1],
+            ])
+            ->assertNotFound();
+
+        $this->assertNull(FormConfig::find('test_form', '../../evil'));
+        $this->assertFileDoesNotExist($escaped);
     }
 }
