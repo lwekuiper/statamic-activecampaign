@@ -14,6 +14,7 @@ use Statamic\Events\SubmissionCreated;
 use Lwekuiper\StatamicActivecampaign\Data\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig as FormConfigFacade;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
+use Throwable;
 
 class AddFromSubmission
 {
@@ -27,7 +28,7 @@ class AddFromSubmission
         $this->config = null;
     }
 
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->data->get($this->config?->value('email_field') ?? 'email');
     }
@@ -103,6 +104,10 @@ class AddFromSubmission
             return;
         }
 
+        if (! $this->getEmail()) {
+            return;
+        }
+
         $listMode = $this->config->value('list_mode') ?? 'always';
 
         $alwaysListIds = in_array($listMode, ['always', 'both'])
@@ -119,18 +124,23 @@ class AddFromSubmission
             return;
         }
 
-        if (! $contact = $this->syncContact()) {
-            return;
-        }
+        // Statamic dispatches this event before it sends the form's emails and responds to the visitor.
+        try {
+            if (! $contact = $this->syncContact()) {
+                return;
+            }
 
-        $contactId = Arr::get($contact, 'contact.id');
+            $contactId = Arr::get($contact, 'contact.id');
 
-        foreach ($allListIds as $listId) {
-            $this->updateListStatus($contactId, $listId);
-        }
+            foreach ($allListIds as $listId) {
+                $this->updateListStatus($contactId, $listId);
+            }
 
-        foreach ($this->config->value('tag_ids') ?? [] as $tagId) {
-            $this->addTagToContact($contactId, $tagId);
+            foreach ($this->config->value('tag_ids') ?? [] as $tagId) {
+                $this->addTagToContact($contactId, $tagId);
+            }
+        } catch (Throwable $e) {
+            report($e);
         }
     }
 

@@ -2,7 +2,11 @@
 
 namespace Lwekuiper\StatamicActivecampaign\Tests\Listeners;
 
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Http;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
 use Lwekuiper\StatamicActivecampaign\Listeners\AddFromSubmission;
 use Lwekuiper\StatamicActiveCampaign\Tests\TestCase;
@@ -391,5 +395,50 @@ class AddFromSubmissionTest extends TestCase
 
         // list_mode is not set, should default to 'always'
         $this->assertEquals('always', $formConfig->listMode());
+    }
+
+    #[Test]
+    public function it_skips_a_submission_without_an_email()
+    {
+        Exceptions::fake();
+        Http::fake();
+
+        $this->dispatchSubmission(['email' => '']);
+
+        Http::assertNothingSent();
+        Exceptions::assertNothingReported();
+    }
+
+    #[Test]
+    public function it_reports_an_activecampaign_error_instead_of_failing_the_submission()
+    {
+        Exceptions::fake();
+        Http::fake(['*' => Http::response(['message' => 'Server error'], 500)]);
+
+        $this->dispatchSubmission(['email' => 'john@example.com']);
+
+        Exceptions::assertReported(RequestException::class);
+    }
+
+    #[Test]
+    public function it_reports_a_failed_connection_instead_of_failing_the_submission()
+    {
+        Exceptions::fake();
+        Http::fake(['*' => Http::failedConnection()]);
+
+        $this->dispatchSubmission(['email' => 'john@example.com']);
+
+        Exceptions::assertReported(ConnectionException::class);
+    }
+
+    private function dispatchSubmission(array $data): void
+    {
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        FormConfig::make()->form($form)->locale('default')->emailField('email')->listIds(['5'])->save();
+
+        $submission = $form->makeSubmission();
+        $submission->data($data);
+
+        Event::dispatch(new SubmissionCreated($submission));
     }
 }
