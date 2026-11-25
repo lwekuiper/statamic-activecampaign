@@ -2,7 +2,9 @@
 
 namespace Lwekuiper\StatamicActivecampaign\Tests\Listeners;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Lwekuiper\StatamicActivecampaign\Facades\ActiveCampaign;
 use Lwekuiper\StatamicActivecampaign\Facades\FormConfig;
@@ -331,5 +333,44 @@ class AddFromSubmissionTest extends TestCase
         $listener->handle(new SubmissionCreated($submission));
 
         $spy->shouldNotHaveReceived('updateListStatus');
+    }
+
+    #[Test]
+    public function it_skips_a_submission_without_an_email()
+    {
+        Http::fake();
+        Exceptions::fake();
+
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['email' => '']);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listIds([1]);
+        $formConfig->save();
+
+        (new AddFromSubmission())->handle(new SubmissionCreated($submission));
+
+        Http::assertNothingSent();
+        Exceptions::assertNothingReported();
+    }
+
+    #[Test]
+    public function it_reports_a_connection_failure_instead_of_failing_the_submission()
+    {
+        Http::fake(fn () => throw new ConnectionException('Connection refused'));
+        Exceptions::fake();
+
+        $form = tap(Form::make('contact_us')->title('Contact Us'))->save();
+        $submission = $form->makeSubmission();
+        $submission->data(['email' => 'john@example.com']);
+
+        $formConfig = FormConfig::make()->form($form)->locale('default');
+        $formConfig->emailField('email')->listIds([1]);
+        $formConfig->save();
+
+        (new AddFromSubmission())->handle(new SubmissionCreated($submission));
+
+        Exceptions::assertReported(ConnectionException::class);
     }
 }
